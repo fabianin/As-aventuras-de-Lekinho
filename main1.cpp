@@ -12,11 +12,29 @@ using namespace std;
 enum {ESQUERDA=-1, MEIO=0,DIREITA=1};
 int posChar=MEIO;
 int moves= 275.;
-char str[10]="000000000";
+string str="000000010";
+int posYObs=380;
 
+
+int pistaAleatoria;
+int pista=290;
+void drawBlock(){
+		glPushMatrix();
+			glColor3f(1,0,1);
+			glBegin(GL_POLYGON);
+				glVertex2f(0,0);
+				glVertex2f(20,0);
+				glVertex2f(20,20);
+				glVertex2f(0,20);
+			glEnd();
+		glPopMatrix();
+		glutSwapBuffers();
+}
 
 
 void init(){
+    
+    srand(time(NULL));
     glClearColor(0.0,0.0,0.0,0.0);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -24,6 +42,7 @@ void init(){
 }
 void drawQuad(){
 		glPushMatrix();
+			glColor3f(1,0,0);
 			glBegin(GL_POLYGON);
 				glVertex2f(0,0);
 				glVertex2f(50,0);
@@ -31,20 +50,20 @@ void drawQuad(){
 				glVertex2f(0,50);
 			glEnd();
 		glPopMatrix();
-		glutSwapBuffers();
+//		glutSwapBuffers();
 }
 
 
-void print(int x, int y, char *string){
+void print(int x, int y, string& string){
 	glPushMatrix();
-		glColor3f(1,0,0);
+		glColor3f(1,1,0);
 		glRasterPos2f(x,y);
-		int len = (int) strlen(string);
+		int len = (int) string.size();
 		for (int i = 0; i < len; i++){
 			glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,string[i]);
 		}
 	glPopMatrix();
-	glutSwapBuffers();
+//	glutSwapBuffers();
 }
 void criaPistas(){
     glPushMatrix();
@@ -58,7 +77,35 @@ void criaPistas(){
             glVertex2f(400.,HEIGHT);
         glEnd();
     glPopMatrix();
-    glutSwapBuffers();
+//    glutSwapBuffers();
+}
+
+void idle(){
+	posYObs-=8;
+	stringstream sstr;
+	int a;
+	sstr.clear();
+	sstr << str;
+	sstr >> a;
+	a++;
+	sstr << a;
+	str.clear();
+	str = sstr.str();
+	if(posYObs<10){
+		posYObs=380;
+		pistaAleatoria=rand()%30;
+		if(pistaAleatoria<10){
+			pista=90;
+		}
+		else if(pistaAleatoria<20 ){
+			pista=290;
+		}
+		else if(pistaAleatoria<30){
+			pista=490;
+		}
+	}
+	glutPostRedisplay();
+
 }
 
 void keyboard(unsigned char tecla, int x, int y){
@@ -75,7 +122,6 @@ void keyboard(unsigned char tecla, int x, int y){
 						  break;
 				default: break;
 		}
-
 	glutPostRedisplay();
 }
 void display(){
@@ -88,6 +134,11 @@ void display(){
 			glTranslatef(moves,0,0);
 			drawQuad();
 		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(pista,posYObs,0);
+			drawBlock();
+		glPopMatrix();
+		glutSwapBuffers();
 
 }
 int main(int argc,char** argv){
@@ -99,6 +150,7 @@ int main(int argc,char** argv){
 		init();
 		glutDisplayFunc(display);
 		glutKeyboardFunc(keyboard);
+		glutIdleFunc(idle);
 		glutMainLoop();
 
 }
