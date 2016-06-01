@@ -1,3 +1,3 @@
-release: main1.cpp
-	g++ main1.cpp -o main -lGL -lGLU -lglut
-	./main
+all: jogo.cpp
+	g++ jogo.cpp Elemento.cpp -o jogo -lGL -lGLU -lglut
+	./jogo

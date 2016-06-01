@@ -20,14 +20,13 @@ int posYObs=380;
 #define X_LEKINHO 50
 
 float escala = 0;
-
+float fatorVelocidade=0.5;
 bool efeito = false;
 int efeitoMinhoca = 0;
 
-int theta = 0, incremento = -10; 
+int theta = 0, incremento = -1; 
 
-void desenhaElipse (GLfloat x, GLfloat y, float radiusX, float radiusY)
-{
+void desenhaElipse (GLfloat x, GLfloat y, float radiusX, float radiusY){
    int i;
  
    glBegin(GL_POLYGON);
@@ -470,24 +469,15 @@ Elemento cacto (desenhaCacto, 0.1*WIDTH);
 Elemento lagarto (desenhaLagarto, 0.05*HEIGHT); 
 Elemento deserto[4] = {areiaMovedica, cobra, cacto, lagarto};
 
-Elemento obs = deserto[rand() % 4];
+int seleciaObjeto = rand()%4;
 
-int pistaAleatoria;
+
+Elemento obs = deserto[seleciaObjeto];
+
 int pista=290;
-void drawBlock(){
-		glPushMatrix();
-			glColor3f(1,0,1);
-			glBegin(GL_POLYGON);
-				glVertex2f(0,0);
-				glVertex2f(20,0);
-				glVertex2f(20,20);
-				glVertex2f(0,20);
-			glEnd();
-		glPopMatrix();
-		glutSwapBuffers();
-}
 
 
+int selecionaPista;
 void init(){
     
     srand(time(NULL));
@@ -498,22 +488,9 @@ void init(){
     
     lekinho.setX(WIDTH / 2.0);
     lekinho.setY(X_LEKINHO);
-    
-    obs.setX((1 + 2*(rand()%3)) * WIDTH/6.0);
+    selecionaPista = (1+ 2*(rand()%3))*WIDTH/6.0;
+    obs.setX(selecionaPista);
 	obs.setY(HEIGHT + 100);
-}
-
-void drawQuad(){
-		glPushMatrix();
-			glColor3f(1,0,0);
-			glBegin(GL_POLYGON);
-				glVertex2f(0,0);
-				glVertex2f(50,0);
-				glVertex2f(50,50);
-				glVertex2f(0,50);
-			glEnd();
-		glPopMatrix();
-//		glutSwapBuffers();
 }
 
 
@@ -542,9 +519,8 @@ void print(int x, int y, string& string){
     glPopMatrix();
 //    glutSwapBuffers();
 }*/
-
 void idle(){
-	obs.setY(obs.getY()-8);
+	obs.setY(obs.getY()-(8*fatorVelocidade));
 	stringstream sstr;
 	int a;
 	sstr.clear();
@@ -558,15 +534,15 @@ void idle(){
 		if (obs.getX() == lekinho.getX())
 			exit(0);
 	if (obs.getY() < -100){
-		obs = deserto[rand() % 4];
-		obs.setX((1 + 2*(rand()%3)) * WIDTH/6.0);
+		seleciaObjeto = rand()%4;
+		obs = deserto[seleciaObjeto];
+    	selecionaPista = (1+ 2*(rand()%3))*WIDTH/6.0;
+		obs.setX(selecionaPista);
 		obs.setY(HEIGHT + 100);
 	}
 	theta += incremento;
-	if (theta == 0)
-		incremento = -10;
-	if (theta == 180)
-		incremento = 10;
+	incremento= fatorVelocidade*10;
+	fatorVelocidade+=0.01;
 	glutPostRedisplay();
 
 }
@@ -594,6 +570,9 @@ void display(){
 		glPushMatrix();
 			glTranslatef(obs.getX(), obs.getY(), 0);
 			//drawBlock();
+			if(seleciaObjeto == 3 && selecionaPista == WIDTH/6.0){
+					glRotatef(180,0,1,0);
+			}
 			obs.desenha()();
 		glPopMatrix();
 		glPushMatrix();
