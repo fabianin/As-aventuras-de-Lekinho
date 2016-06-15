@@ -4,6 +4,7 @@
 
 string str="000000010";
 float fatorVelocidade = 0.5;
+int ciclos = 0;
 
 Personagem *lekinho;
 Obstaculo *obstaculo1;
@@ -11,23 +12,16 @@ Obstaculo *obstaculo2;
 Fase *fase;
 
 void init() {
-        
-	srand(time(NULL));
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0,WIDTH,0,HEIGHT,-100,100);
     
-	lekinho = new Personagem (LEKINHO, PISTA2, 50, 0.06*HEIGHT, true);
+    srand(time(NULL));
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0,WIDTH,0,HEIGHT,-100,100);
+    
+	lekinho = new Personagem (LEKINHO, WIDTH/2.0, 50, 0.06*HEIGHT, true);
 	fase = new Fase (FLORESTA); //TESTE INICIANDO COM FLORESTA
-	obstaculo1 = fase->getObstaculo();
-	fase->ocupaPista(obstaculo1->getX(), true);
+	obstaculo1 = fase->obstaculoSegundoProbabilidade(1.0);
 	obstaculo2 = fase->obstaculoSegundoProbabilidade(0.3);
-	if (obstaculo2) {
-			float pistaObstaculo2;
-			do pistaObstaculo2 = PISTA_ALEATORIA; while (pistaObstaculo2 == obstaculo1->getX());
-			obstaculo2->setX(pistaObstaculo2);
-			fase->ocupaPista(obstaculo2->getX(), true);
-	}
 }
 
 void print(int x, int y, string& string){
@@ -53,33 +47,27 @@ bool colide (Elemento* elemento1, Elemento* elemento2) {
 
 void atualizaObstaculos () {
 	obstaculo1->setY(obstaculo1->getY()-(8*fatorVelocidade));
-	obstaculo1->realizaAcao(fase->getPistasLivres());
-	obstaculo1->setCiclo(obstaculo1->getCiclo() + 1);	
+	obstaculo1->realizaAcao();
+	obstaculo1->setCiclos(obstaculo1->getCiclos() + 1);	
 	if (obstaculo2) {
 		obstaculo2->setY(obstaculo2->getY()-(8*fatorVelocidade));
-		obstaculo2->realizaAcao(fase->getPistasLivres());
-		obstaculo2->setCiclo(obstaculo2->getCiclo() + 1);
+		obstaculo2->realizaAcao();
+		obstaculo2->setCiclos(obstaculo2->getCiclos() + 1);
 	}
 
 	if (obstaculo1->ySuperior() < 0){
-		fase->ocupaPista(obstaculo1->getX(), false);
-		if (obstaculo2)
-			fase->ocupaPista(obstaculo2->getX(), false);
-		
 		obstaculo1 = fase->getObstaculo();
 		obstaculo2 = fase->obstaculoSegundoProbabilidade(0.3);
 
 		obstaculo1->setX(PISTA_ALEATORIA);
 		obstaculo1->setY(HEIGHT + 100);
-		obstaculo1->setCiclo(0);	
-		fase->ocupaPista(obstaculo1->getX(), true);
+		obstaculo1->setCiclos(0);
 		if (obstaculo2) {
-			float pistaObstaculo2;
+			int pistaObstaculo2;
 			do pistaObstaculo2 = PISTA_ALEATORIA; while (pistaObstaculo2 == obstaculo1->getX());
 			obstaculo2->setX(pistaObstaculo2);
 			obstaculo2->setY(HEIGHT + 100);
-			obstaculo2->setCiclo(0);
-			fase->ocupaPista(obstaculo2->getX(), true);
+			obstaculo2->setCiclos(0);
 		} 
 	}
 }	
@@ -134,12 +122,13 @@ void display(){
 			print(490,380,str);
 		glPopMatrix();
 
-		obstaculo1->desenha(obstaculo1->getX(), obstaculo1->getY(), obstaculo1->getCiclo());
+		obstaculo1->desenha(obstaculo1->getX(), obstaculo1->getY());
 		if (obstaculo2)
-			obstaculo2->desenha(obstaculo2->getX(), obstaculo2->getY(), obstaculo2->getCiclo());
-		lekinho->desenha(lekinho->getX(), lekinho->getY(), lekinho->getCiclo());
+			obstaculo1->desenha(obstaculo2->getX(), obstaculo2->getY());
+		lekinho->desenha(lekinho->getX(), lekinho->getY());
 
 		glutSwapBuffers();
+
 }
 
 int main(int argc,char** argv){
@@ -153,4 +142,5 @@ int main(int argc,char** argv){
 		glutKeyboardFunc(keyboard);
 		glutIdleFunc(idle);
 		glutMainLoop();
+
 }

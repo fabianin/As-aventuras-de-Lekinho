@@ -1,0 +1,3 @@
+release: jogo.cpp
+	g++ jogo.cpp Elemento.cpp -o main -lGL -lGLU -lglut
+	./jogo

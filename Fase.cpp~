@@ -1,0 +1,49 @@
+#include "Fase.h"
+
+Fase::Fase (Cenario cenario) {
+	this->cenario = cenario;
+	switch (cenario) {
+		case FLORESTA:
+			glClearColor(0, 0.5, 0, 0);
+			this->obstaculos.push_back(new Obstaculo (TERRA, 			PISTA_ALEATORIA, HEIGHT + 100, 0.10*WIDTH, false));
+			this->obstaculos.push_back(new Obstaculo (PLANTA_CARNIVORA, PISTA_ALEATORIA, HEIGHT + 100, 0.20*WIDTH, true));
+			this->obstaculos.push_back(new Obstaculo (SAPO, 			PISTA_ALEATORIA, HEIGHT + 100, 0.20*WIDTH, true));
+			this->obstaculos.push_back(new Obstaculo (MINHOCA, 			PISTA_ALEATORIA, HEIGHT + 100, 0.10*WIDTH, true));
+			this->obstaculos.push_back(new Obstaculo (TOCO, 			PISTA_ALEATORIA, HEIGHT + 100, 0.05*HEIGHT, true));
+			break;
+		case GELO:
+			glClearColor(0.8, 0.8, 1, 0);
+			this->obstaculos.push_back(new Obstaculo (GELO_TRINCADO,	PISTA_ALEATORIA, HEIGHT + 100, 0.1*WIDTH, false));
+			this->obstaculos.push_back(new Obstaculo (ICEBERGS, 		PISTA_ALEATORIA, HEIGHT + 100, 0.1*WIDTH, true));
+			this->obstaculos.push_back(new Obstaculo (GELO_QUEBRADO,	PISTA_ALEATORIA, HEIGHT + 100, 0.1*WIDTH, true));
+			this->obstaculos.push_back(new Obstaculo (URSO, 			PISTA_ALEATORIA, HEIGHT + 100, 0.1*WIDTH, true));
+			this->obstaculos.push_back(new Obstaculo (LEAO_MARINHO, 	PISTA_ALEATORIA, HEIGHT + 100, 0.1*WIDTH, true));
+			break;
+		case DESERTO:
+			glClearColor(0.6, 0.5, 0, 0);
+			this->obstaculos.push_back(new Obstaculo (AREIA_MOVEDICA, 	PISTA_ALEATORIA, HEIGHT + 100, 0.1*WIDTH, true));
+			this->obstaculos.push_back(new Obstaculo (CACTO, 			PISTA_ALEATORIA, HEIGHT + 100, 0.1*WIDTH, true));
+			this->obstaculos.push_back(new Obstaculo (COBRA, 			PISTA_ALEATORIA, HEIGHT + 100, 0.1*WIDTH, true));
+			this->obstaculos.push_back(new Obstaculo (LAGARTO, 			PISTA_ALEATORIA, HEIGHT + 100, 0.1*WIDTH, true));
+			//this->obstaculos.push_back(new Obstaculo (LINGUA, 			PISTA_ALEATORIA, HEIGHT + 100, 0.1*WIDTH, true));
+			break;
+	}
+}
+
+Obstaculo* Fase::getObstaculo () {
+	return OBSTACULO_ALEATORIO;
+}
+
+Obstaculo* Fase::obstaculoSegundoProbabilidade (float probabilidade) {
+	cout << 0.1*(rand()%11) << endl;
+	if (0.1*(rand()%11) <= probabilidade)
+		return getObstaculo();
+	else
+		return NULL;
+}
+
+Fase::~Fase () {
+	for (vector<Obstaculo*>::iterator it = (this->obstaculos).begin(); it != (this->obstaculos).end(); it++)
+		delete *it;
+	delete this;
+}

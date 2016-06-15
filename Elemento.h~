@@ -5,13 +5,12 @@
 
 using namespace std;
 
-#define NUM_PISTAS 3
-#define NUM_FASES 3
 #define PISTA1 WIDTH/6.0
 #define PISTA2 WIDTH/2.0
 #define PISTA3 5*WIDTH/6.0
 #define PISTA_ALEATORIA (1+ 2*(rand()%3))*WIDTH/6.0
 #define OBSTACULO_ALEATORIO (this->obstaculos).at(rand()%(this->obstaculos).size())
+#define NUM_FASES 3
 #define CENARIO_ALEATORIO rand()%NUM_FASES
 
 typedef enum {
@@ -26,20 +25,20 @@ class Elemento {
 	protected:
 		Id id;
 		float x, y, faixay;
-		int ciclo;
+		int ciclos;
 		bool colide;
 	
 	public:
 		Elemento (Id, float, float, float, bool);
-		void desenha (int, int, int);
+		void desenha (int, int);
 		float getX ();
 		float getY ();
 		bool podeColidir ();
-		int getCiclo ();
+		void getCiclos ();
 		void setX (float);
 		void setY (float);
 		void setPodeColidir (bool);
-		void setCiclo (int);
+		void setCiclos ();
 		float ySuperior ();
 		float yInferior ();
 		~Elemento ();
