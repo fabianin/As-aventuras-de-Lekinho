@@ -6,9 +6,7 @@
 
 #define WIDTH 600
 #define HEIGHT 400
-#define PISTA1 WIDTH/6.0
-#define PISTA2 WIDTH/2.0
-#define PISTA3 5*WIDTH/6.0
+#define RESPOSTA_ALEATORIA rand()%2?true:false
 
 //GEOMETRIA
 void desenhaElipse();
@@ -29,7 +27,7 @@ void desenhaAgua();
 void desenhaTerra();
 void desenhaPlantaCarnivora(int);
 void desenhaSapo();
-void desenhaMinhoca(int);
+void desenhaMinhoca();
 void desenhaToco();
 void desenhaGeloTrincado();
 void desenhaIcebergs();
@@ -39,7 +37,7 @@ void desenhaLeaoMarinho();
 void desenhaAreiaMovedica(int);
 void desenhaCacto();
 void desenhaCobra();
-void desenhaLagarto(float, int);
-void desenhaLingua(float);
+void desenhaLagarto();
+//void desenhaLingua();
 
 # endif

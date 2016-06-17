@@ -1,0 +1,21 @@
+#ifndef FASE_H
+#define FASE_H
+
+#include "Obstaculo.h"
+
+typedef enum {FLORESTA, GELO, DESERTO} Cenario;
+
+class Fase {
+	
+	private:
+		Cenario cenario;		
+		vector<Obstaculo*> obstaculos;
+
+	public:
+		Fase (Cenario);
+		Obstaculo* getObstaculo ();
+		Obstaculo* obstaculoSegundoProbabilidade ();
+		~Fase ();
+};
+
+#endif

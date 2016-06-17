@@ -4,19 +4,22 @@ Obstaculo::Obstaculo (Id id, float x, float y, float faixay, bool colide): Eleme
 	this->projetil = NULL;
 }
 
-void Obstaculo::realizarAcao (bool pista1Ocupada, bool pista2Ocupada, bool pista3Ocupada) {
+map<float, bool> Obstaculo::realizaAcao (map<float, bool> pistasLivres) {
 	switch (id) {
 		case SAPO:
 			if (ciclo == 45) {
 				float pistaDestino = PISTA_ALEATORIA;
-				if ((pistaDestino == PISTA1 && !pista1Ocupada) || (pistaDestino == PISTA2 && !pista2Ocupada) ||
-					(pistaDestino == PISTA3 && !pista3Ocupada)) {
+				pistasLivres[x] = true;
+				if (pistasLivres[pistaDestino]) {
 					setX(pistaDestino);
+					pistasLivres[x] = false;
 				}
 			}
 			break;
 		case LAGARTO:
-			if ((!pista1Ocupada && !pista2Ocupada) || (!pista1Ocupada && !pista3Ocupada) || (!pista2Ocupada && !pista3Ocupada)) {
+			if ((pistasLivres[PISTA1] && pistasLivres[PISTA2]) ||
+				(pistasLivres[PISTA1] && pistasLivres[PISTA3]) ||
+				(pistasLivres[PISTA2] && pistasLivres[PISTA3]  )) {
 				if (ciclo == 45 && ATIVAR_EFEITO) {
 					float pistaAoLado;
 					if (x == PISTA1)
@@ -24,10 +27,14 @@ void Obstaculo::realizarAcao (bool pista1Ocupada, bool pista2Ocupada, bool pista
 					else
 						pistaAoLado = x - TAM_PISTA;
 					projetil = new Obstaculo (LINGUA, pistaAoLado, y, 0, true);
+					pistasLivres[pistaAoLado] = false;
 				}
 			}
+			if (projetil)
+				projetil->setY(y);
 			break;
 	}
+	return pistasLivres;
 }
 
 Obstaculo* Obstaculo::getProjetil () {

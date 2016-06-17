@@ -8,13 +8,9 @@ using namespace std;
 #define NUM_PISTAS 3
 #define TAM_PISTA WIDTH/3.0
 #define NUM_FASES 3
-#define PISTA_ALEATORIA (1 + 2*(rand()%3))*WIDTH/6.0
+#define PISTA_ALEATORIA (1+ 2*(rand()%3))*WIDTH/6.0
 #define OBSTACULO_ALEATORIO (this->obstaculos).at(rand()%(this->obstaculos).size())
 #define CENARIO_ALEATORIO rand()%NUM_FASES
-#define ATIVAR_EFEITO rand()%2?true:false
-#define Y_INICIAL HEIGHT+100
-#define Y_FINAL -100
-#define GERAR_OBSTACULO2 0.1*(rand()%11) <= 0.3
 
 typedef enum {
 	LEKINHO,

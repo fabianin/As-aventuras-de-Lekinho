@@ -5,14 +5,8 @@
 
 class Obstaculo: public Elemento {
 	
-	private:
-		Obstaculo* projetil;
-	
 	public:
 		Obstaculo (Id, float, float, float, bool);
-		Obstaculo* getProjetil ();
-		void setProjetil (Obstaculo*);
-		void realizarAcao (bool, bool, bool);
 		~Obstaculo ();
 };
 

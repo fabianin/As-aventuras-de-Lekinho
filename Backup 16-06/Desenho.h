@@ -6,6 +6,7 @@
 
 #define WIDTH 600
 #define HEIGHT 400
+#define ATIVAR_EFEITO rand()%2?true:false
 #define PISTA1 WIDTH/6.0
 #define PISTA2 WIDTH/2.0
 #define PISTA3 5*WIDTH/6.0

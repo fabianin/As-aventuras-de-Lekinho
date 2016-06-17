@@ -12,7 +12,7 @@ class Obstaculo: public Elemento {
 		Obstaculo (Id, float, float, float, bool);
 		Obstaculo* getProjetil ();
 		void setProjetil (Obstaculo*);
-		void realizarAcao (bool, bool, bool);
+		map<float, bool> realizaAcao (map<float, bool>);
 		~Obstaculo ();
 };
 

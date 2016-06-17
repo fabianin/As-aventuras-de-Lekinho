@@ -386,8 +386,10 @@ void desenhaCobra () {
 }
 
 void desenhaLingua (float x) {	
+	if (x == PISTA1)
+		glRotatef(180, 0, 0, 1);
 	glColor3f(1, 0, 0);
-	desenhaLinha(-0.25, 0, 0.25, 0, 7);
+	desenhaLinha(0.3, 0, -0.1, 0, 7);
 }
 
 void desenhaLagarto (float x, int ciclo) {

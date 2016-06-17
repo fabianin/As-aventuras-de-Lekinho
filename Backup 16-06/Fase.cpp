@@ -29,52 +29,44 @@ Fase::Fase (Cenario cenario) {
 			break;
 	}
 	
-	renovarObstaculos();
+	pistasLivres[PISTA1] = true;
+	pistasLivres[PISTA2] = true;
+	pistasLivres[PISTA3] = true;
 }
 
-Obstaculo* Fase::getObstaculo1 () {
-	return obstaculo1;
+Obstaculo* Fase::getObstaculo () {
+	Obstaculo* obstaculo = OBSTACULO_ALEATORIO;
+	float pista;
+	do pista = PISTA_ALEATORIA; while (!pistaLivre(pista));
+	obstaculo->setX(pista);
+	obstaculo->setY(HEIGHT + 100);
+	obstaculo->setCiclo(0);
+	obstaculo->setProjetil(NULL);
+	ocupaPista(obstaculo->getX(), true);
+	return obstaculo;
 }
 
-Obstaculo* Fase::getObstaculo2 () {
-	return obstaculo2;
-}
-
-void Fase::renovarObstaculos () {
-	obstaculo1 = OBSTACULO_ALEATORIO;
-	obstaculo1->setY(Y_INICIAL);
-	obstaculo1->setCiclo(0);
-	obstaculo1->setProjetil(NULL);
-	if (GERAR_OBSTACULO2) {
-		float pistaObstaculo2;
-		obstaculo2 = OBSTACULO_ALEATORIO;
-		do pistaObstaculo2 = PISTA_ALEATORIA; while (obstaculo1->getX() == pistaObstaculo2);
-		obstaculo2->setX(pistaObstaculo2);
-		obstaculo2->setY(HEIGHT + 100);
-		obstaculo2->setCiclo(0);
-	}
+Obstaculo* Fase::obstaculoSegundoProbabilidade (float probabilidade) {
+	if (0.1*(rand()%11) <= probabilidade)
+		return getObstaculo();
 	else
-		obstaculo2 = NULL;
+		return NULL;
 }
 
-void Fase::atualizarObstaculo (Obstaculo *obstaculo, float fatorVelocidade) {
-	if (obstaculo) {
-		obstaculo->setY(obstaculo->getY()-(8*fatorVelocidade));
-		obstaculo->realizarAcao(pistaOcupada(PISTA1), pistaOcupada(PISTA2), pistaOcupada(PISTA3));
-		obstaculo->setCiclo(obstaculo->getCiclo() + 1);
-	}
+map<float, bool> Fase::getPistasLivres () {
+	return pistasLivres;
 }
 
-void Fase::atualizarObstaculos (float fatorVelocidade) {
-	atualizarObstaculo(obstaculo1->getProjetil(), fatorVelocidade);
-	atualizarObstaculo(obstaculo1, fatorVelocidade);
-	atualizarObstaculo(obstaculo2, fatorVelocidade);
+void Fase::setPistasLivres (map<float, bool> pistasLivres) {
+	this->pistasLivres = pistasLivres;
 }
 
-bool Fase::pistaOcupada (float pista) {
-	return 	(obstaculo1->getX() == pista) ||
-			(obstaculo2 != NULL && obstaculo2->getX() == pista) ||
-			(obstaculo1->getProjetil() != NULL && obstaculo1->getProjetil()->getX() == pista);
+void Fase::ocupaPista (float pista, bool ocupa) {
+	pistasLivres[pista] = !ocupa;
+}
+
+bool Fase::pistaLivre (float pista) {
+	return pistasLivres[pista];
 }
 
 Fase::~Fase () {

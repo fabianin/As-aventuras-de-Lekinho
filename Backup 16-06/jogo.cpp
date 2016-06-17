@@ -6,6 +6,8 @@ string str="000000010";
 float fatorVelocidade = 0.5;
 
 Personagem *lekinho;
+Obstaculo *obstaculo1;
+Obstaculo *obstaculo2;
 Fase *fase;
 
 void init() {
@@ -17,6 +19,8 @@ void init() {
     
 	lekinho = new Personagem (LEKINHO, PISTA2, 50, 0.06*HEIGHT, true);
 	fase = new Fase (FLORESTA); //TESTE INICIANDO COM FLORESTA
+	obstaculo1 = fase->getObstaculo();
+	obstaculo2 = fase->obstaculoSegundoProbabilidade(0.3);
 }
 
 void print(int x, int y, string& string){
@@ -38,6 +42,15 @@ bool colide (Elemento* elemento1, Elemento* elemento2) {
 			elemento2->yInferior() < elemento1->ySuperior() &&
 			elemento2->ySuperior() > elemento1->yInferior() &&
 			elemento1->getX() == elemento2->getX();
+}
+
+Obstaculo* atualizaObstaculos (Obstaculo* obstaculo) {
+	if (obstaculo) {
+		obstaculo->setY(obstaculo->getY()-(8*fatorVelocidade));
+		fase->setPistasLivres(obstaculo->realizaAcao(fase->getPistasLivres()));
+		obstaculo->setCiclo(obstaculo->getCiclo() + 1);
+	}
+	return obstaculo;
 }	
 
 void idle(){
@@ -50,12 +63,18 @@ void idle(){
 	sstr << a;
 	str.clear();
 	str = sstr.str();*/
-	fase->atualizarObstaculos(fatorVelocidade);
-	if (colide(lekinho, fase->getObstaculo1()) ||colide(lekinho, fase->getObstaculo1()->getProjetil()) ||
-		colide(lekinho, fase->getObstaculo2()))
+	obstaculo1 = atualizaObstaculos(obstaculo1);
+	obstaculo2 = atualizaObstaculos(obstaculo2);
+	if (colide(lekinho, obstaculo1) || colide(lekinho, obstaculo1->getProjetil()) || colide(lekinho, obstaculo2))
 		exit(0);
-	if (fase->getObstaculo1()->getY() < Y_FINAL)
-		fase->renovarObstaculos();
+	if (obstaculo1->getY() < -100) {
+		fase->ocupaPista(obstaculo1->getX(), false);
+		if (obstaculo1->getProjetil()) fase->ocupaPista(obstaculo1->getProjetil()->getX(), false);
+		if (obstaculo2) fase->ocupaPista(obstaculo2->getX(), false);
+		obstaculo1 = fase->getObstaculo();
+		obstaculo2 = fase->obstaculoSegundoProbabilidade(0.3);
+		cout << !fase->getPistasLivres()[PISTA1] << !fase->getPistasLivres()[PISTA2] << !fase->getPistasLivres()[PISTA3] << endl << endl;
+	}
 	fatorVelocidade+=0.0000001;
 	glutPostRedisplay();
 }
@@ -98,9 +117,9 @@ void display(){
 			print(490,380,str);
 		glPopMatrix();
 
-		desenha(fase->getObstaculo1()->getProjetil());
-		desenha(fase->getObstaculo1());
-		desenha(fase->getObstaculo2());
+		desenha(obstaculo1->getProjetil());
+		desenha(obstaculo1);
+		desenha(obstaculo2);
 		desenha(lekinho);
 
 		glutSwapBuffers();

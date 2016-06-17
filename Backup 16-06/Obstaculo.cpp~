@@ -1,0 +1,18 @@
+#include "Obstaculo.h"
+
+Obstaculo::Obstaculo (Id id, float x, float y, float faixay, bool colide): Elemento (id, x, y, faixay, colide) {}
+
+void Obstaculo::realizaAcao () {
+	switch (id) {
+		case SAPO:
+			if (ciclos == 45)
+				setX (PISTA_ALEATORIA);
+			break;
+		case LAGARTO:
+			break;
+	}
+}
+
+Obstaculo::~Obstaculo () {
+	delete this;
+}

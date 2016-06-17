@@ -10,15 +10,16 @@ class Fase {
 	private:
 		Cenario cenario;		
 		vector<Obstaculo*> obstaculos;
-		map<float, bool> pistasLivres;
+		Obstaculo *obstaculo1, *obstaculo2;
 
 	public:
 		Fase (Cenario);
-		Obstaculo* getObstaculo ();
-		Obstaculo* obstaculoSegundoProbabilidade (float);
-		map<float, bool> getPistasLivres ();
-		void ocupaPista (float, bool);
-		bool pistaLivre (float);
+		Obstaculo* getObstaculo1 ();
+		Obstaculo* getObstaculo2 ();
+		void renovarObstaculos ();
+		void atualizarObstaculo (Obstaculo*, float);
+		void atualizarObstaculos (float);
+		bool pistaOcupada (float);
 		~Fase ();
 };
 
