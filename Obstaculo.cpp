@@ -1,6 +1,7 @@
 #include "Obstaculo.h"
 
-Obstaculo::Obstaculo (Id id, float x, float y, float faixay, bool colide): Elemento (id, x, y, faixay, colide) {
+Obstaculo::Obstaculo (Id id, Caracteristica caracteristica, float x, float y, float faixay, bool colide): 
+						Elemento (id, caracteristica, x, y, faixay, colide) {
 	this->projetil = NULL;
 }
 
@@ -23,7 +24,7 @@ void Obstaculo::realizarAcao (bool pista1Ocupada, bool pista2Ocupada, bool pista
 						pistaAoLado = PISTA2;
 					else
 						pistaAoLado = x - TAM_PISTA;
-					projetil = new Obstaculo (LINGUA, pistaAoLado, y, 0, true);
+					projetil = new Obstaculo (LINGUA, TERRESTRE, pistaAoLado, y, 0, true);
 				}
 			}
 			break;
@@ -36,6 +37,12 @@ Obstaculo* Obstaculo::getProjetil () {
 
 void Obstaculo::setProjetil (Obstaculo* projetil) {
 	this->projetil = projetil;
+}
+
+void Obstaculo::atualizar (float fatorVelocidade, bool pista1Ocupada, bool pista2Ocupada, bool pista3Ocupada) {
+	setY(getY()-(8*fatorVelocidade));
+	realizarAcao(pista1Ocupada, pista2Ocupada, pista3Ocupada);
+	setCiclo(getCiclo() + 1);
 }
 
 Obstaculo::~Obstaculo () {

@@ -9,10 +9,11 @@ class Obstaculo: public Elemento {
 		Obstaculo* projetil;
 	
 	public:
-		Obstaculo (Id, float, float, float, bool);
+		Obstaculo (Id, Caracteristica, float, float, float, bool);
+		void realizarAcao (bool, bool, bool);
 		Obstaculo* getProjetil ();
 		void setProjetil (Obstaculo*);
-		void realizarAcao (bool, bool, bool);
+		void atualizar (float, bool, bool, bool);
 		~Obstaculo ();
 };
 

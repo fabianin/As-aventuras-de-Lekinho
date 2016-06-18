@@ -18,7 +18,7 @@ void desenhaElipse (GLfloat x, GLfloat y, float radiusX, float radiusY){
 }
 
 void desenhaCirculo (GLfloat x, GLfloat y, GLfloat radius){
-	desenhaElipse(x, y, radius, radius*WIDTH/400.0);
+	desenhaElipse(x, y, radius, radius*WIDTH/FATOR_PROPORCAO);
 }
 
 void desenhaCircunferencia (GLfloat x, GLfloat y, GLfloat radius){
@@ -31,7 +31,7 @@ void desenhaCircunferencia (GLfloat x, GLfloat y, GLfloat radius){
 		for(i = 0; i <= lineAmount;i++) { 
 			glVertex2f(
 				(x + (radius * cos(i *  twicePi / lineAmount)))*WIDTH, 
-				y*HEIGHT + (radius * sin(i * twicePi / lineAmount) * WIDTH)
+				y*HEIGHT + (radius * sin(i * twicePi / lineAmount) * WIDTH * HEIGHT/FATOR_PROPORCAO)
 			);
 		}
 	glEnd();
@@ -68,41 +68,6 @@ void desenhaQuadrilatero (float x1, float y1, float x2, float y2, float x3, floa
 		glVertex2f(x4*WIDTH, y4*HEIGHT);
 	glEnd();
 } 
-
-/*void desenhaBonecoDeNeve () {
-	glColor3f(0.95, 0.95, 1);
-	desenhaCirculo(300.0/HEIGHT, 200.0/HEIGHT, 120.0/WIDTH); //bola inferior
-	
-	glColor3f(0.9, 0.9, 1);
-	desenhaCirculo(300/WIDTH, 220/HEIGHT, 94/WIDTH); //bola central
-	
-	glColor3f(0.85, 0.85, 1);
-	desenhaCirculo(300/WIDTH, 240/HEIGHT, 60/WIDTH); //bola superior
-	
-	glColor3f(0, 0, 0);
-	desenhaElipse(300/WIDTH, 260/HEIGHT, 60/WIDTH, 40/WIDTH); //cartola
-	desenhaElipse(300/WIDTH, 300/HEIGHT, 40/WIDTH, 28/WIDTH);
-	
-	desenhaTriangulo(265/WIDTH, 200/HEIGHT, 283/WIDTH, 200, 265/WIDTH, 212/HEIGHT); //olhos
-	desenhaTriangulo(335/WIDTH, 200/HEIGHT, 317/WIDTH, 200, 335/WIDTH, 212/HEIGHT);
-	
-	desenhaLinha(394/WIDTH, 220/HEIGHT, 394/WIDTH, 120/HEIGHT, 5); //braços
-	desenhaLinha(394/WIDTH, 120/HEIGHT, 300/WIDTH, 80/HEIGHT, 5);
-	desenhaLinha(206/WIDTH, 220/HEIGHT, 206/WIDTH, 120/HEIGHT, 5);
-	desenhaLinha(206/WIDTH, 120/HEIGHT, 300/WIDTH, 40/HEIGHT, 5);
-	
-	glColor3f(0.44, 0.126, 0.919); //arma
-	desenhaQuadrilatero(265/WIDTH, 20/HEIGHT, 335/WIDTH, 20/HEIGHT, 335/WIDTH, 80/HEIGHT, 265/WIDTH, 80/HEIGHT);
-	desenhaQuadrilatero(265/WIDTH, 80/HEIGHT, 285/WIDTH, 120/HEIGHT, 315/WIDTH, 120/HEIGHT, 335/WIDTH, 80/HEIGHT);
-	glColor3f(1, 0.5, 0);
-	desenhaQuadrilatero(291/WIDTH, 40/HEIGHT, 291/WIDTH, 100/HEIGHT, 309/WIDTH, 100/HEIGHT, 309/WIDTH, 40/HEIGHT);
-	desenhaElipse(300/WIDTH, 16/HEIGHT, 48/WIDTH, 16/WIDTH);
-	glColor3f(0, 0, 0);
-	desenhaElipse(300/WIDTH, 12, 40/WIDTH, 8/WIDTH);
-		
-	glColor3f(1, 0.5, 0);
-	desenhaTriangulo(288/WIDTH, 188/HEIGHT, 312/WIDTH, 188/HEIGHT, 300/WIDTH, 120/HEIGHT); //nariz
-}*/
 
 void desenhaGeloTrincado () {
 	glColor3f(0, 0, 1);
@@ -349,14 +314,24 @@ void desenhaAreiaMovedica (int ciclo) {
 		desenhaCircunferencia(0, 0, i);
 }
 
-void desenhaCacto () {
+void desenhaCacto (bool emColisao) { 
 	glColor3f(0, 0.4, 0);
-	desenhaQuadrilatero(-0.1, 0.03, 0.1, 0.03, 0.1, -0.03, -0.1, -0.03);
-	
-	glColor3f(0, 0.6, 0);
-	desenhaCirculo(0, 0, 0.05);
-	desenhaCirculo(-0.1, 0, 0.03);
-	desenhaCirculo(0.1, 0, 0.03);
+	if (!emColisao) {
+		desenhaQuadrilatero(-0.1, 0.03, 0.1, 0.03, 0.1, -0.03, -0.1, -0.03);
+		
+		glColor3f(0, 0.6, 0);
+		desenhaCirculo(0, 0, 0.05);
+		desenhaCirculo(-0.1, 0, 0.03);
+		desenhaCirculo(0.1, 0, 0.03);
+	}
+	else {
+		desenhaCirculo(0, 0, 0.02);
+		desenhaCirculo(-0.1,  0.1, 0.02);
+		desenhaCirculo(-0.1, -0.1, 0.02);
+		desenhaCirculo( 0.1,  0.1, 0.02);
+		desenhaCirculo( 0.1, -0.1, 0.02);
+	}
+		
 }
 
 void desenhaCobra () {
@@ -385,7 +360,7 @@ void desenhaCobra () {
 	desenhaElipse(0.015, -0.115, 0.01, 0.005);
 }
 
-void desenhaLingua (float x) {	
+void desenhaLingua () {	
 	glColor3f(1, 0, 0);
 	desenhaLinha(-0.25, 0, 0.25, 0, 7);
 }
@@ -407,6 +382,90 @@ void desenhaLagarto (float x, int ciclo) {
 	desenhaLinha(-0.04, -0.08, -0.03, -0.09, 5);
 	desenhaLinha(0.04, -0.08, 0.03, -0.09, 5);
 	desenhaLinha(0.04, -0.08, 0.05, -0.09, 5);
+}
+
+void desenhaBolaDeNeve () {
+	glColor3f(1, 1, 1);
+	desenhaCirculo(0, 0, 0.035);
+}
+
+void desenhaBonecoDeNeve (int ciclo, bool emColisao) {
+	float alteraCor = emColisao? 0.25 : 0;
+	
+	glColor3f(0.95, 0.95 - alteraCor, 1  - alteraCor);
+	desenhaCirculo(0, 0, 0.12); //bola inferior
+	
+	glColor3f(0.9, 0.9 - alteraCor, 1 - alteraCor);
+	desenhaCirculo(0, 0.03, 0.094); //bola central
+	
+	glColor3f(0.85, 0.85 - alteraCor, 1 - alteraCor);
+	desenhaCirculo(0, 0.06, 0.06); //bola superior
+	
+	glColor3f(0, 0, 0);
+	desenhaElipse(0, 0.09, 0.06, 0.060); //cartola
+	desenhaElipse(0, 0.15, 0.04, 0.042);
+	
+	desenhaTriangulo(-0.035, 0, -0.017, 0, -0.035, 0.018); //olhos
+	desenhaTriangulo( 0.035, 0,  0.017, 0,  0.035, 0.018);
+	
+	desenhaLinha( 0.094,  0.03,  0.094, -0.12, 5); //braços
+	desenhaLinha( 0.094, -0.12,  0.000, -0.18, 5);
+	desenhaLinha(-0.094,  0.03, -0.094, -0.12, 5);
+	desenhaLinha(-0.094, -0.12,  0.000, -0.24, 5);
+	
+	bool piscaArma = ciclo > 100 && ciclo < 170 && (ciclo/5)%2;
+	glColor3f(0.44, 0.126, 0.919); //arma
+	desenhaQuadrilatero(-0.035, -0.27,  0.035, -0.27, 0.035, -0.18, -0.035, -0.18);
+	desenhaQuadrilatero(-0.035, -0.18, -0.015, -0.12, 0.015, -0.12,  0.035, -0.18);
+	glColor3f(1, 0.5, 0);
+	desenhaQuadrilatero(-0.009, -0.24, -0.009, -0.15, 0.009, -0.15, 0.009, -0.24);
+	desenhaElipse(0, -0.276, 0.048, 0.024);
+	
+	if (!piscaArma)
+		glColor3f(0, 0, 0);
+	else
+		glColor3f(0.9, 0.9, 1);
+	desenhaElipse(0, -0.282, 0.04, 0.012);
+		
+	glColor3f(1, 0.5, 0);
+	desenhaTriangulo(-0.012, -0.018, 0.012, -0.018, 0, -0.12); //nariz
+}
+
+void desenhaVerme (int ciclo, bool emColisao) {
+	glColor3f(0.7, 0.6, 0); //areia
+	desenhaCirculo(0, 0, 0.08);
+	desenhaQuadrilatero(-0.08, 0, 0.08, 0, 0.08, -50/HEIGHT, -0.08, -50/HEIGHT);
+	glColor3f(1, 1, 0);
+	for (int i = 0; i >= -50; i -= 15)
+		desenhaLinha(-0.08, (i - ciclo%10)/HEIGHT, 0.08, (i - ciclo%10)/HEIGHT, 1);
+	if (ciclo > 180) {
+		desenhaCircunferencia(0, 0, 0.01*((ciclo/2)%8));
+		desenhaCircunferencia(0, 0, 0.01*((ciclo/2)%4));
+	}
+	
+	if (ciclo >= 250) {
+		//cabeça
+		glColor3f(0.7, 0.3, 0);
+		desenhaCirculo(0, 0, 0.08);
+		if (!emColisao) {
+			glColor3f(1, 1, 1);
+			desenhaCirculo(0, 0, 0.05);
+			glColor3f(0, 0, 0);
+			for (int angulo = 0; angulo < 360; angulo += 45) {
+				glPushMatrix();
+					glRotatef(angulo, 0, 0, 1);
+					desenhaTriangulo(-0.05, 0, 0, 0.01*(1+(ciclo/10)%3), 0, -0.01*(1+(ciclo/10)%3));
+				glPopMatrix();
+			}
+		}
+		else {
+			int numero0a3 = (ciclo/5)%4;
+			glRotatef(numero0a3 * 90, 0, 0, 1);
+			desenhaQuadrilatero(-0.08, 0, 0.08, 0, 0.08, 0.1, -0.08, 0.1);
+			desenhaCirculo(0, 0.1, 0.08);
+		}
+			
+	}
 }
 
 void desenhaLekinho (/*int anguloMovimento*/) {

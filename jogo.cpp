@@ -15,7 +15,7 @@ void init() {
 	glLoadIdentity();
 	glOrtho(0,WIDTH,0,HEIGHT,-100,100);
     
-	lekinho = new Personagem (LEKINHO, PISTA2, 50, 0.06*HEIGHT, true);
+	lekinho = new Personagem (LEKINHO, TERRESTRE, PISTA2, Y_LEKINHO, 0.06*HEIGHT, true, 1);
 	fase = new Fase (FLORESTA); //TESTE INICIANDO COM FLORESTA
 }
 
@@ -40,6 +40,14 @@ bool colide (Elemento* elemento1, Elemento* elemento2) {
 			elemento1->getX() == elemento2->getX();
 }	
 
+bool lekinhoAtingido () {
+	return 	colide(lekinho, fase->getObstaculo1()) ||
+			colide(lekinho, fase->getObstaculo1()->getProjetil()) ||
+			colide(lekinho, fase->getObstaculo2()) ||
+			(fase->IsEmChefe() && colide(lekinho, fase->getChefe()) ||
+			(fase->IsEmChefe() && fase->getChefe()->getProjetil() && colide(lekinho, fase->getChefe()->getProjetil())));
+}
+
 void idle(){
 	/*stringstream sstr;
 	int a;
@@ -51,9 +59,25 @@ void idle(){
 	str.clear();
 	str = sstr.str();*/
 	fase->atualizarObstaculos(fatorVelocidade);
-	if (colide(lekinho, fase->getObstaculo1()) ||colide(lekinho, fase->getObstaculo1()->getProjetil()) ||
-		colide(lekinho, fase->getObstaculo2()))
-		exit(0);
+	if (fase->IsEmChefe()) {
+		fase->getChefe()->atualizar(lekinho->getX(), fatorVelocidade);
+		if (colide(fase->getChefe(), fase->getObstaculo1())) {
+			if (!fase->getChefe()->IsEmColisao()) {
+				fase->getChefe()->setEmColisao(true);
+				fase->getObstaculo1()->setEmColisao(true);
+				fase->getChefe()->decrementaVida();
+				cout << fase->getChefe()->getVida() << endl;
+			}
+		}
+		else {
+			fase->getChefe()->setEmColisao(false);
+			fase->getObstaculo1()->setEmColisao(false);
+			if (!fase->getChefe()->getVida())
+				fase->setEmChefe(false);
+		}
+	}
+	if (lekinhoAtingido())
+		exit(0);	
 	if (fase->getObstaculo1()->getY() < Y_FINAL)
 		fase->renovarObstaculos();
 	fatorVelocidade+=0.0000001;
@@ -81,40 +105,54 @@ void keyboard(unsigned char tecla, int x, int y){
 		case '3':
 			fase = new Fase (DESERTO);
 			break;
+		case '4':
+			fase->setEmChefe(true);
+			break;
 		//
 	}
 	glutPostRedisplay();
 }
 
-void desenha (Elemento* elemento) {
-	if (elemento)
+void desenha (Elemento* elemento, Caracteristica caracteristica) {
+	if (elemento && elemento->getCaracteristica() == caracteristica)
 		elemento->desenha();
 }
 
+void atualizarTela (Caracteristica caracteristica) {
+	desenha(fase->getObstaculo1()->getProjetil(), caracteristica);
+	desenha(fase->getObstaculo1(), caracteristica);
+	desenha(fase->getObstaculo2(), caracteristica);
+	if (fase->IsEmChefe()) {
+		desenha(fase->getChefe(), caracteristica);
+		desenha(fase->getChefe()->getProjetil(), caracteristica);
+	}
+	desenha(lekinho, caracteristica);
+}
+
 void display(){
-		glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);
 
-		glPushMatrix();
-			print(490,380,str);
-		glPopMatrix();
+	glPushMatrix();
+		print(490,380,str);
+	glPopMatrix();
+	
+	
+	atualizarTela (SUBTERRANEO);
+	atualizarTela (TERRESTRE);
+	atualizarTela (AEREO);
 
-		desenha(fase->getObstaculo1()->getProjetil());
-		desenha(fase->getObstaculo1());
-		desenha(fase->getObstaculo2());
-		desenha(lekinho);
-
-		glutSwapBuffers();
+	glutSwapBuffers();
 }
 
 int main(int argc,char** argv){
-		glutInit(&argc,argv);
-		glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-		glutInitWindowPosition(250,200);
-		glutInitWindowSize(WIDTH,HEIGHT);
-		glutCreateWindow("As aventuras de Lekinho");
-		init();
-		glutDisplayFunc(display);
-		glutKeyboardFunc(keyboard);
-		glutIdleFunc(idle);
-		glutMainLoop();
+	glutInit(&argc,argv);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+	glutInitWindowPosition(250,200);
+	glutInitWindowSize(WIDTH,HEIGHT);
+	glutCreateWindow("As aventuras de Lekinho");
+	init();
+	glutDisplayFunc(display);
+	glutKeyboardFunc(keyboard);
+	glutIdleFunc(idle);
+	glutMainLoop();
 }
