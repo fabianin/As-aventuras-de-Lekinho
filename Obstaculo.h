@@ -9,8 +9,7 @@ class Obstaculo: public Elemento {
 		Obstaculo* projetil;
 	
 	public:
-		Obstaculo (Id, Caracteristica, float, float, float, bool);
-		void realizarAcao (bool, bool, bool);
+		Obstaculo (Id, Caracteristica, Estado, float, float, float, bool);
 		Obstaculo* getProjetil ();
 		void setProjetil (Obstaculo*);
 		void atualizar (float, bool, bool, bool);

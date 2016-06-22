@@ -10,7 +10,7 @@ class Personagem: public Elemento {
 		Obstaculo* projetil;
 		
 	public:
-		Personagem (Id, Caracteristica, float, float, float, bool, int);
+		Personagem (Id, Caracteristica, Estado, float, float, float, bool, int);
 		int getVida ();
 		int getVidaInicial ();
 		Obstaculo* getProjetil ();
@@ -19,7 +19,7 @@ class Personagem: public Elemento {
 		void setProjetil (Obstaculo*);
 		void incrementaVida ();
 		void decrementaVida ();
-		void atualizar (float, float);
+		void atualizar (float, float, Personagem*, Obstaculo*, Obstaculo*);
 		~Personagem ();
 };
 

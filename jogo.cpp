@@ -15,7 +15,7 @@ void init() {
 	glLoadIdentity();
 	glOrtho(0,WIDTH,0,HEIGHT,-100,100);
     
-	lekinho = new Personagem (LEKINHO, TERRESTRE, PISTA2, Y_LEKINHO, 0.06*HEIGHT, true, 1);
+	lekinho = new Personagem (LEKINHO, TERRESTRE, TRANSLADANDO, PISTA2, Y_LEKINHO, 0.06*HEIGHT, true, 1);
 	fase = new Fase (FLORESTA); //TESTE INICIANDO COM FLORESTA
 }
 
@@ -30,24 +30,6 @@ void print(int x, int y, string& string){
 	glPopMatrix();
 }
 
-bool colide (Elemento* elemento1, Elemento* elemento2) {
-	return 	elemento1 != NULL &&
-			elemento2 != NULL &&
-			elemento1->podeColidir() &&
-			elemento2->podeColidir() &&
-			elemento2->yInferior() < elemento1->ySuperior() &&
-			elemento2->ySuperior() > elemento1->yInferior() &&
-			elemento1->getX() == elemento2->getX();
-}	
-
-bool lekinhoAtingido () {
-	return 	colide(lekinho, fase->getObstaculo1()) ||
-			colide(lekinho, fase->getObstaculo1()->getProjetil()) ||
-			colide(lekinho, fase->getObstaculo2()) ||
-			(fase->IsEmChefe() && colide(lekinho, fase->getChefe()) ||
-			(fase->IsEmChefe() && fase->getChefe()->getProjetil() && colide(lekinho, fase->getChefe()->getProjetil())));
-}
-
 void idle(){
 	/*stringstream sstr;
 	int a;
@@ -59,25 +41,12 @@ void idle(){
 	str.clear();
 	str = sstr.str();*/
 	fase->atualizarObstaculos(fatorVelocidade);
-	if (fase->IsEmChefe()) {
-		fase->getChefe()->atualizar(lekinho->getX(), fatorVelocidade);
-		if (colide(fase->getChefe(), fase->getObstaculo1())) {
-			if (!fase->getChefe()->IsEmColisao()) {
-				fase->getChefe()->setEmColisao(true);
-				fase->getObstaculo1()->setEmColisao(true);
-				fase->getChefe()->decrementaVida();
-				cout << fase->getChefe()->getVida() << endl;
-			}
-		}
-		else {
-			fase->getChefe()->setEmColisao(false);
-			fase->getObstaculo1()->setEmColisao(false);
+	if (fase->getChefe()) {
+		fase->getChefe()->atualizar(lekinho->getX(), fatorVelocidade, fase->getChefe(), fase->getObstaculo1(), fase->getObstaculo2());
 			if (!fase->getChefe()->getVida())
-				fase->setEmChefe(false);
-		}
+				fase->terminarChefe();
 	}
-	if (lekinhoAtingido())
-		exit(0);	
+	lekinho->atualizar(lekinho->getX(), fatorVelocidade, fase->getChefe(), fase->getObstaculo1(), fase->getObstaculo2());
 	if (fase->getObstaculo1()->getY() < Y_FINAL)
 		fase->renovarObstaculos();
 	fatorVelocidade+=0.0000001;
@@ -106,7 +75,7 @@ void keyboard(unsigned char tecla, int x, int y){
 			fase = new Fase (DESERTO);
 			break;
 		case '4':
-			fase->setEmChefe(true);
+			fase->iniciarChefe();
 			break;
 		//
 	}
@@ -122,9 +91,9 @@ void atualizarTela (Caracteristica caracteristica) {
 	desenha(fase->getObstaculo1()->getProjetil(), caracteristica);
 	desenha(fase->getObstaculo1(), caracteristica);
 	desenha(fase->getObstaculo2(), caracteristica);
-	if (fase->IsEmChefe()) {
-		desenha(fase->getChefe(), caracteristica);
+	if (fase->getChefe()) {
 		desenha(fase->getChefe()->getProjetil(), caracteristica);
+		desenha(fase->getChefe(), caracteristica);
 	}
 	desenha(lekinho, caracteristica);
 }

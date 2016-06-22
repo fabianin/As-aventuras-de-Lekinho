@@ -10,7 +10,6 @@ class Fase {
 	
 	private:
 		Cenario cenario;
-		bool emChefe;	
 		vector<Obstaculo*> obstaculos;
 		Obstaculo *obstaculo1, *obstaculo2;
 		Personagem* chefe;
@@ -20,8 +19,8 @@ class Fase {
 		Obstaculo* getObstaculo1 ();
 		Obstaculo* getObstaculo2 ();
 		Personagem* getChefe ();
-		bool IsEmChefe ();
-		void setEmChefe (bool);
+		void iniciarChefe ();
+		void terminarChefe ();
 		void renovarObstaculos ();
 		void atualizarObstaculos (float);
 		bool pistaOcupada (float);

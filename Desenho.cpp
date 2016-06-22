@@ -133,8 +133,8 @@ void desenhaAgua () {
 		glEnd();
 }
 
-void desenhaGeloQuebrado (int ciclo) {
-	if (ciclo < 45)	
+void desenhaGeloQuebrado (Estado estado) {
+	if (estado == TRANSLADANDO)	
 		desenhaGeloTrincado();
 	else
 		desenhaAgua();
@@ -243,7 +243,7 @@ void desenhaTerra () {
 		}
 }
 
-void desenhaPlantaCarnivora (int ciclo) {
+void desenhaPlantaCarnivora (int tempoEstado) {
 	glColor3f(0, 0.3, 0);
 	desenhaElipse(-0.07, 0, 0.07, 0.075);
 	desenhaElipse( 0.07, 0, 0.07, 0.075); 
@@ -251,7 +251,7 @@ void desenhaPlantaCarnivora (int ciclo) {
 	glColor3f(0, 0.6, 0);
 	desenhaCirculo(0, 0, 0.07);
 	
-	bool aplicarEfeito = (ciclo/5)%2 != 0;
+	bool aplicarEfeito = (tempoEstado/5)%2 != 0;
 	if (aplicarEfeito) {
 		glColor3f(0.5, 0.7, 0.5);
 		desenhaElipse(0, -0.08, 0.06, 0.025);
@@ -268,15 +268,15 @@ void desenhaPlantaCarnivora (int ciclo) {
 	}
 }
 
-void desenhaMinhoca (int ciclo) {
+void desenhaMinhoca (Estado estado, int tempoEstado) {
 	desenhaTerra();
 
-	if (ciclo > 45) {
+	if (estado != TRANSLADANDO) {
 		desenhaCirculo(0, 0, 0.06);
 		glColor3f(1, 0.8, 0.8);
 		desenhaCirculo(0, 0, 0.04);
 		
-		if (ciclo < 50) 
+		if (estado == INICIANDO_ATAQUE) 
 			for (float i = -0.15; i <= 0.15; i += 0.3)
 				for (float j = -0.15; j <= 0.15; j += 0.3) {
 					glColor3f(0.5, 0.2, 0.1);
@@ -286,7 +286,11 @@ void desenhaMinhoca (int ciclo) {
 				}
 		else {
 			glPushMatrix();
-				int numero0a3 = (ciclo/10)%4;
+				int numero0a3;
+				if (estado != PRESO)
+					numero0a3 = (tempoEstado/10)%4;
+				else
+					numero0a3 = 3;
 				glRotatef(numero0a3 * 90, 0, 0, 1);
 				glColor3f(1, 0.8, 0.8);
 				desenhaQuadrilatero(-0.04, 0, 0.04, 0, 0.04, -0.11, -0.04, -0.11);
@@ -300,12 +304,12 @@ void desenhaMinhoca (int ciclo) {
 	}
 }
 
-void desenhaAreiaMovedica (int ciclo) {
+void desenhaAreiaMovedica (int tempoEstado) {
 	glColor3f(0.7, 0.6, 0);
 	desenhaCirculo(0, 0, 0.1);
 	
 	float aux = 0.09;
-	bool aplicarEfeito = (ciclo/5)%2 != 0;
+	bool aplicarEfeito = (tempoEstado/5)%2 != 0;
 	if (aplicarEfeito)
 		aux = 0.08;
 	
@@ -314,9 +318,9 @@ void desenhaAreiaMovedica (int ciclo) {
 		desenhaCircunferencia(0, 0, i);
 }
 
-void desenhaCacto (bool emColisao) { 
+void desenhaCacto (Estado estado) { 
 	glColor3f(0, 0.4, 0);
-	if (!emColisao) {
+	if (estado != COLIDINDO) {
 		desenhaQuadrilatero(-0.1, 0.03, 0.1, 0.03, 0.1, -0.03, -0.1, -0.03);
 		
 		glColor3f(0, 0.6, 0);
@@ -365,7 +369,7 @@ void desenhaLingua () {
 	desenhaLinha(-0.25, 0, 0.25, 0, 7);
 }
 
-void desenhaLagarto (float x, int ciclo) {
+void desenhaLagarto (float x) {
 	if (x == PISTA1)
 		glRotatef(180, 0, 0, 1);
 	glColor3f(0.5, 0.8, 0.3);
@@ -384,13 +388,68 @@ void desenhaLagarto (float x, int ciclo) {
 	desenhaLinha(0.04, -0.08, 0.05, -0.09, 5);
 }
 
+void desenhaTeia (float faixay) {
+	glColor3f(1, 1, 1);
+	desenhaLinha(0, 0.5*faixay/HEIGHT, 0, -0.5*faixay/HEIGHT, 2);
+}
+
+void desenhaAranha (int tempoEstado, Estado estado) {
+	bool virada = false;
+	int fatorVelocMovPatas = (estado == PRESO)? 1 : 10;
+	int anguloAberturaQueliceras = 0;
+	float pataMovimento1 = -0.06 + 0.04*((tempoEstado/fatorVelocMovPatas)%2);
+	float pataMovimento2 = 0.02 + 0.04*((tempoEstado/fatorVelocMovPatas)%2);
+	int ladoPataMovimento = (tempoEstado/5)%2? 1 : -1;
+	if (estado == SURGINDO || estado == TRANSLADANDO ||
+		estado == INICIANDO_ATAQUE && (tempoEstado/10)%2)
+		anguloAberturaQueliceras = 5;
+	else if (estado == ATACANDO || estado == PRESO || estado == SOFRENDO_DANO)
+		anguloAberturaQueliceras = 12;
+
+	if (estado == SOFRENDO_DANO && (tempoEstado/10)%2) {
+		virada = true;
+		glRotatef(180, 1, 0, 0);
+	}
+	else
+		virada = false;
+	glColor3f(1, 0, 0);
+	for (int lado = 1; lado >= -1; lado -= 2) {
+		for (float i = -0.06; i < 0.10; i += 0.04) { //patas
+			glPushMatrix();
+				glTranslatef(0, i, 0);
+				if ((i == pataMovimento1 || i == pataMovimento2) && lado == ladoPataMovimento)
+					glRotatef(30*lado, 0, 0, 1);
+				desenhaLinha(0.00, 		i, 0.08*lado, i, 		3);
+				desenhaLinha(0.08*lado, i, 0.09*lado, i - 0.05, 3);
+			glPopMatrix();
+		}
+		
+		glPushMatrix(); //queliceras
+			glTranslatef(0, -0.08, 0);
+			glRotatef(anguloAberturaQueliceras*lado, 0, 0, 1);
+			desenhaTriangulo(0, 0, 0, -0.2,  0.03*lado, 0);
+		glPopMatrix();
+	}
+	
+	glColor3f(0, 0, 0); //corpo
+	desenhaElipse(0, 0, 0.04, 0.1);
+	desenhaCirculo(0, -0.08, 0.04);
+	
+	if (!virada) {
+		glColor3f(1, 0, 0); //olhos
+		for (float i = -0.085; i > -0.105; i -= 0.015)
+			for (float j = -0.015; j <= 0.015; j += 0.01)
+				desenhaCirculo(j, i, 0.005);
+	}
+}
+
 void desenhaBolaDeNeve () {
 	glColor3f(1, 1, 1);
 	desenhaCirculo(0, 0, 0.035);
 }
 
-void desenhaBonecoDeNeve (int ciclo, bool emColisao) {
-	float alteraCor = emColisao? 0.25 : 0;
+void desenhaBonecoDeNeve (int tempoEstado, Estado estado) {
+	float alteraCor = (estado == COLIDINDO)? 0.25 : 0;
 	
 	glColor3f(0.95, 0.95 - alteraCor, 1  - alteraCor);
 	desenhaCirculo(0, 0, 0.12); //bola inferior
@@ -413,7 +472,7 @@ void desenhaBonecoDeNeve (int ciclo, bool emColisao) {
 	desenhaLinha(-0.094,  0.03, -0.094, -0.12, 5);
 	desenhaLinha(-0.094, -0.12,  0.000, -0.24, 5);
 	
-	bool piscaArma = ciclo > 100 && ciclo < 170 && (ciclo/5)%2;
+	bool piscaArma = estado == INICIANDO_ATAQUE && (tempoEstado/5)%2;
 	glColor3f(0.44, 0.126, 0.919); //arma
 	desenhaQuadrilatero(-0.035, -0.27,  0.035, -0.27, 0.035, -0.18, -0.035, -0.18);
 	desenhaQuadrilatero(-0.035, -0.18, -0.015, -0.12, 0.015, -0.12,  0.035, -0.18);
@@ -431,40 +490,39 @@ void desenhaBonecoDeNeve (int ciclo, bool emColisao) {
 	desenhaTriangulo(-0.012, -0.018, 0.012, -0.018, 0, -0.12); //nariz
 }
 
-void desenhaVerme (int ciclo, bool emColisao) {
+void desenhaVerme (int tempoEstado, Estado estado) {
 	glColor3f(0.7, 0.6, 0); //areia
 	desenhaCirculo(0, 0, 0.08);
 	desenhaQuadrilatero(-0.08, 0, 0.08, 0, 0.08, -50/HEIGHT, -0.08, -50/HEIGHT);
 	glColor3f(1, 1, 0);
 	for (int i = 0; i >= -50; i -= 15)
-		desenhaLinha(-0.08, (i - ciclo%10)/HEIGHT, 0.08, (i - ciclo%10)/HEIGHT, 1);
-	if (ciclo > 180) {
-		desenhaCircunferencia(0, 0, 0.01*((ciclo/2)%8));
-		desenhaCircunferencia(0, 0, 0.01*((ciclo/2)%4));
+		desenhaLinha(-0.08, (i - tempoEstado%10)/HEIGHT, 0.08, (i - tempoEstado%10)/HEIGHT, 1);
+	if (estado == INICIANDO_ATAQUE) {
+		desenhaCirculo(0, 0, 0.01*((tempoEstado/2)%8));
+		desenhaCirculo(0, 0, 0.01*((tempoEstado/2)%4));
 	}
 	
-	if (ciclo >= 250) {
-		//cabeça
+	//cabeça
+	if (estado == ATACANDO || estado == COLIDINDO) {
 		glColor3f(0.7, 0.3, 0);
 		desenhaCirculo(0, 0, 0.08);
-		if (!emColisao) {
+		if (estado == ATACANDO) {
 			glColor3f(1, 1, 1);
 			desenhaCirculo(0, 0, 0.05);
 			glColor3f(0, 0, 0);
 			for (int angulo = 0; angulo < 360; angulo += 45) {
 				glPushMatrix();
 					glRotatef(angulo, 0, 0, 1);
-					desenhaTriangulo(-0.05, 0, 0, 0.01*(1+(ciclo/10)%3), 0, -0.01*(1+(ciclo/10)%3));
+					desenhaTriangulo(-0.05, 0, 0, 0.01*(1+(tempoEstado/10)%3), 0, -0.01*(1+(tempoEstado/10)%3));
 				glPopMatrix();
 			}
 		}
-		else {
-			int numero0a3 = (ciclo/5)%4;
+		if (estado == COLIDINDO) {
+			int numero0a3 = (tempoEstado/5)%4;
 			glRotatef(numero0a3 * 90, 0, 0, 1);
 			desenhaQuadrilatero(-0.08, 0, 0.08, 0, 0.08, 0.1, -0.08, 0.1);
 			desenhaCirculo(0, 0.1, 0.08);
 		}
-			
 	}
 }
 
