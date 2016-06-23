@@ -1,10 +1,7 @@
 #ifndef FASE_H
 #define FASE_H
 
-#include "Obstaculo.h"
 #include "Personagem.h"
-
-typedef enum {FLORESTA, GELO, DESERTO} Cenario;
 
 class Fase {
 	
@@ -13,16 +10,20 @@ class Fase {
 		vector<Obstaculo*> obstaculos;
 		Obstaculo *obstaculo1, *obstaculo2;
 		Personagem* chefe;
+		Bonus* bonus;
 
 	public:
-		Fase (Cenario);
+		Fase ();
 		Obstaculo* getObstaculo1 ();
 		Obstaculo* getObstaculo2 ();
 		Personagem* getChefe ();
+		Bonus* getBonus ();
 		void iniciarChefe ();
 		void terminarChefe ();
 		void renovarObstaculos ();
+		void renovarBonus ();
 		void atualizarObstaculos (float);
+		void atualizarBonus (float);
 		bool pistaOcupada (float);
 		~Fase ();
 };

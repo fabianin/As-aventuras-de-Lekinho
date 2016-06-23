@@ -395,6 +395,8 @@ void desenhaTeia (float faixay) {
 
 void desenhaAranha (int tempoEstado, Estado estado) {
 	bool virada = false;
+	if (estado == MORRENDO)
+		virada = true;
 	int fatorVelocMovPatas = (estado == PRESO)? 1 : 10;
 	int anguloAberturaQueliceras = 0;
 	float pataMovimento1 = -0.06 + 0.04*((tempoEstado/fatorVelocMovPatas)%2);
@@ -406,12 +408,12 @@ void desenhaAranha (int tempoEstado, Estado estado) {
 	else if (estado == ATACANDO || estado == PRESO || estado == SOFRENDO_DANO)
 		anguloAberturaQueliceras = 12;
 
-	if (estado == SOFRENDO_DANO && (tempoEstado/10)%2) {
+	if (estado == SOFRENDO_DANO && (tempoEstado/10)%2)
 		virada = true;
-		glRotatef(180, 1, 0, 0);
-	}
-	else
+	else if (estado != MORRENDO)
 		virada = false;
+	if (virada)
+		glRotatef(180, 1, 0, 0);
 	glColor3f(1, 0, 0);
 	for (int lado = 1; lado >= -1; lado -= 2) {
 		for (float i = -0.06; i < 0.10; i += 0.04) { //patas
@@ -451,21 +453,31 @@ void desenhaBolaDeNeve () {
 void desenhaBonecoDeNeve (int tempoEstado, Estado estado) {
 	float alteraCor = (estado == COLIDINDO)? 0.25 : 0;
 	
-	glColor3f(0.95, 0.95 - alteraCor, 1  - alteraCor);
-	desenhaCirculo(0, 0, 0.12); //bola inferior
-	
-	glColor3f(0.9, 0.9 - alteraCor, 1 - alteraCor);
-	desenhaCirculo(0, 0.03, 0.094); //bola central
-	
-	glColor3f(0.85, 0.85 - alteraCor, 1 - alteraCor);
-	desenhaCirculo(0, 0.06, 0.06); //bola superior
+	if (estado != MORRENDO) {
+		glColor3f(0.95, 0.95 - alteraCor, 1  - alteraCor);
+		desenhaCirculo(0, 0, 0.12); //bola inferior
+		
+		glColor3f(0.9, 0.9 - alteraCor, 1 - alteraCor);
+		desenhaCirculo(0, 0.03, 0.094); //bola central
+		
+		glColor3f(0.85, 0.85 - alteraCor, 1 - alteraCor);
+		desenhaCirculo(0, 0.06, 0.06); //bola superior
+		
+		glColor3f(0, 0, 0);
+		desenhaTriangulo(-0.035, 0, -0.017, 0, -0.035, 0.018); //olhos
+		desenhaTriangulo( 0.035, 0,  0.017, 0,  0.035, 0.018);
+	}
+	else {
+		glColor3f(0.95, 0.95, 1);
+		desenhaCirculo(-0.05, -0.05, 0.08);
+		desenhaCirculo( 0.05, -0.05, 0.08);
+		desenhaCirculo( 0.00,  0.05, 0.08);
+	}  
+
 	
 	glColor3f(0, 0, 0);
 	desenhaElipse(0, 0.09, 0.06, 0.060); //cartola
 	desenhaElipse(0, 0.15, 0.04, 0.042);
-	
-	desenhaTriangulo(-0.035, 0, -0.017, 0, -0.035, 0.018); //olhos
-	desenhaTriangulo( 0.035, 0,  0.017, 0,  0.035, 0.018);
 	
 	desenhaLinha( 0.094,  0.03,  0.094, -0.12, 5); //braços
 	desenhaLinha( 0.094, -0.12,  0.000, -0.18, 5);
@@ -503,7 +515,7 @@ void desenhaVerme (int tempoEstado, Estado estado) {
 	}
 	
 	//cabeça
-	if (estado == ATACANDO || estado == COLIDINDO) {
+	if (estado == ATACANDO || estado == COLIDINDO || estado == MORRENDO) {
 		glColor3f(0.7, 0.3, 0);
 		desenhaCirculo(0, 0, 0.08);
 		if (estado == ATACANDO) {
@@ -517,51 +529,75 @@ void desenhaVerme (int tempoEstado, Estado estado) {
 				glPopMatrix();
 			}
 		}
-		if (estado == COLIDINDO) {
-			int numero0a3 = (tempoEstado/5)%4;
-			glRotatef(numero0a3 * 90, 0, 0, 1);
+		else {
+			if (estado == COLIDINDO) {
+				int numero0a3 = (tempoEstado/5)%4;
+				glRotatef(numero0a3 * 90, 0, 0, 1);
+			}
 			desenhaQuadrilatero(-0.08, 0, 0.08, 0, 0.08, 0.1, -0.08, 0.1);
 			desenhaCirculo(0, 0.1, 0.08);
 		}
 	}
 }
 
-void desenhaLekinho (/*int anguloMovimento*/) {
-	glPushMatrix();
-		//glRotatef(anguloMovimento, 1, 0, 0);
-	
-		glColor3f(1, 0.8, 0.6);
-		desenhaQuadrilatero(0.05, 0, 0.07, 0, 0.07, 0.08, 0.05, 0.08); //braço direito
-		desenhaCirculo(0.06, 0.08, 0.015);
+void desenhaLekinho (int tempoEstado, Estado estado) {
+	if ((estado != INVENCIVEL && estado != RECUPERANDO && estado != PROTEGIDO_E_INVENCIVEL) || (tempoEstado/10)%2) {
+		glPushMatrix();
+			//glRotatef(anguloMovimento, 1, 0, 0);
 		
-		glColor3f(0, 0, 0.7);
-		desenhaQuadrilatero(-0.01, 0, -0.04, 0, -0.04, 0.1, -0.01, 0.1); //perna esquerda
-		glColor3f(0.55, 0.27, 0.07);
-		desenhaElipse(-0.025, 0.1, 0.02, 0.02);
-	glPopMatrix();
+			glColor3f(1, 0.8, 0.6);
+			desenhaQuadrilatero(0.05, 0, 0.07, 0, 0.07, 0.08, 0.05, 0.08); //braço direito
+			desenhaCirculo(0.06, 0.08, 0.015);
+			
+			glColor3f(0, 0, 0.7);
+			desenhaQuadrilatero(-0.01, 0, -0.04, 0, -0.04, 0.1, -0.01, 0.1); //perna esquerda
+			glColor3f(0.55, 0.27, 0.07);
+			desenhaElipse(-0.025, 0.1, 0.02, 0.02);
+		glPopMatrix();
+		
+		glPushMatrix();
+			//glRotatef(-anguloMovimento, 1, 0, 0); 
+		
+			glColor3f(1, 0.8, 0.6);
+			desenhaQuadrilatero(-0.05, 0, -0.07, 0, -0.07, -0.08, -0.05, -0.08); //braço esquerdo
+			desenhaCirculo(-0.06, -0.08, 0.015);
+		
+			glColor3f(0, 0, 0.7);
+			desenhaQuadrilatero(0.01, 0, 0.04, 0, 0.04, -0.1, 0.01, -0.1); //perna direita
+			glColor3f(0.55, 0.27, 0.07);
+			desenhaElipse(0.025, -0.1, 0.02, 0.02);
+		glPopMatrix();
+		
+		glColor3f(1, 0, 0);
+		desenhaElipse(0, 0, 0.07, 0.03);
+		glColor3f(0, 0, 0);
+		desenhaCirculo(0, 0, 0.03);
+		desenhaTriangulo(-0.015, 0.04, -0.01, 0.07, -0.005, 0.04);
+		desenhaTriangulo(-0.005, 0.04, +0.00, 0.07, +0.005, 0.04); 
+		desenhaTriangulo(+0.005, 0.04, +0.01, 0.07, +0.015, 0.04);
+		glColor3f(1, 1, 1);
+		desenhaLinha(-0.01, -0.02, -0.01, 0.02, 1);
+		desenhaLinha(0, -0.02, 0, 0.02, 1);
+		desenhaLinha(0.01, -0.02, 0.01, 0.02, 1);
 	
-	glPushMatrix();
-		//glRotatef(-anguloMovimento, 1, 0, 0); 
-	
-		glColor3f(1, 0.8, 0.6);
-		desenhaQuadrilatero(-0.05, 0, -0.07, 0, -0.07, -0.08, -0.05, -0.08); //braço esquerdo
-		desenhaCirculo(-0.06, -0.08, 0.015);
-	
-		glColor3f(0, 0, 0.7);
-		desenhaQuadrilatero(0.01, 0, 0.04, 0, 0.04, -0.1, 0.01, -0.1); //perna direita
-		glColor3f(0.55, 0.27, 0.07);
-		desenhaElipse(0.025, -0.1, 0.02, 0.02);
-	glPopMatrix();
-	
+	}	
+	if (estado == PROTEGIDO || estado == PROTEGIDO_E_INVENCIVEL) {
+		glColor3f(0, 1, 0);
+		desenhaCircunferencia(0, 0, 0.1);
+	}
+}
+
+void desenhaEscudo () {
+	glColor3f(0, 1, 0);
+	desenhaCirculo(0, 0, 0.035);
+}
+
+void desenhaInvencibilidade () {
+	glColor3f(1, 1, 0);
+	desenhaCirculo(0, 0, 0.035);
+}
+
+void desenhaPontos () {
 	glColor3f(1, 0, 0);
-	desenhaElipse(0, 0, 0.07, 0.03);
-	glColor3f(0, 0, 0);
-	desenhaCirculo(0, 0, 0.03);
-	desenhaTriangulo(-0.015, 0.04, -0.01, 0.07, -0.005, 0.04);
-	desenhaTriangulo(-0.005, 0.04, +0.00, 0.07, +0.005, 0.04); 
-	desenhaTriangulo(+0.005, 0.04, +0.01, 0.07, +0.015, 0.04);
-	glColor3f(1, 1, 1);
-	desenhaLinha(-0.01, -0.02, -0.01, 0.02, 1);
-	desenhaLinha(0, -0.02, 0, 0.02, 1);
-	desenhaLinha(0.01, -0.02, 0.01, 0.02, 1);
+	desenhaCirculo(0, 0, 0.035);
 }

@@ -1,17 +1,13 @@
 #include "Personagem.h"
 
-Personagem::Personagem (Id id, Caracteristica caracteristica, Estado estado, float x, float y, float faixay, bool colide, int vidaInicial): 
+Personagem::Personagem (Id id, Caracteristica caracteristica, Estado estado, float x, float y, float faixay, bool colide, int vida): 
 						Elemento (id, caracteristica, estado, x, y, faixay, colide) {
-	this->vidaInicial = this->vida = vidaInicial;
+	this->vida = vida;
 	this->projetil = NULL;
 }
 
 int Personagem::getVida () {
 	return vida;
-}
-
-int Personagem::getVidaInicial () {
-	return vidaInicial;
 }
 
 Obstaculo* Personagem::getProjetil () {
@@ -22,12 +18,15 @@ void Personagem::setVida (int vida) {
 	this->vida = vida;
 }
 
-void Personagem::setVidaInicial (int vidaInicial) {
-	this->vidaInicial = vidaInicial;
-}
-
 void Personagem::setProjetil (Obstaculo* projetil) {
 	this->projetil = projetil;
+}
+
+bool Personagem::coletaBonus (Bonus* bonus) {
+	return	bonus != NULL &&
+			bonus->yInferior() < this->ySuperior() &&
+			bonus->ySuperior() > this->yInferior() &&
+			this->getX() == bonus->getX();
 }
 
 void Personagem::incrementaVida () {
@@ -38,14 +37,70 @@ void Personagem::decrementaVida () {
 	vida--;
 }
 
-void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* chefe, Obstaculo* obstaculo1, Obstaculo* obstaculo2) {
+void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* chefe, Obstaculo* obstaculo1, Obstaculo* obstaculo2, 
+							Bonus* bonus) {
 	switch (id) {
 		case LEKINHO:
+			if (coletaBonus(bonus)) {
+				bonus->setColetado(true);
+				switch (bonus->getId()) {
+					case ESCUDO:
+						if (estado != INVENCIVEL && estado != PROTEGIDO_E_INVENCIVEL)
+							trocaEstado(PROTEGIDO);
+						else {
+							int tempoInvencivel = tempoEstado;
+							trocaEstado(PROTEGIDO_E_INVENCIVEL);
+							tempoEstado = tempoInvencivel;
+						}
+						break;
+					case INVENCIBILIDADE:
+						if (estado != PROTEGIDO && estado != PROTEGIDO_E_INVENCIVEL )
+							trocaEstado(INVENCIVEL);
+						else
+							trocaEstado(PROTEGIDO_E_INVENCIVEL);
+						break;
+				}
+			}
 			switch (estado) {
 				case TRANSLADANDO:
+					if (tempoEstado == 0)
+						colide = true;
 					if (colideCom(obstaculo1) || colideCom(obstaculo1->getProjetil()) || colideCom(obstaculo2) || colideCom(chefe) ||
 						(chefe && colideCom(chefe->getProjetil())))
 						exit(0);
+					tempoEstado++;
+					break;
+				case PROTEGIDO:
+					if (tempoEstado == 0)
+						colide = true;
+					if (colideCom(obstaculo1) || colideCom(obstaculo1->getProjetil()) || colideCom(obstaculo2) || colideCom(chefe) ||
+						(chefe && colideCom(chefe->getProjetil())))
+						trocaEstado(RECUPERANDO);
+					else
+						tempoEstado++;
+					break;
+				case RECUPERANDO:
+					if (tempoEstado == 0)
+						colide = false;
+					if (tempoEstado == 100)
+						trocaEstado(TRANSLADANDO);
+					else
+						tempoEstado++;
+					break;
+				case INVENCIVEL:
+					if (tempoEstado == 0)
+						colide = false;
+					if (tempoEstado == 500)
+						trocaEstado(TRANSLADANDO);
+					else
+						tempoEstado++;
+					break;
+				case PROTEGIDO_E_INVENCIVEL:
+					colide = false;
+					if (tempoEstado == 500)
+						trocaEstado(PROTEGIDO);
+					else
+						tempoEstado++;
 					break;
 			}
 			break;
@@ -59,7 +114,7 @@ void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* c
 						x = xLekinho;
 						tempoEstado++;
 					}
-				break;
+					break;
 				case TRANSLADANDO:
 					if (tempoEstado == 0)
 						colide = false;
@@ -93,9 +148,15 @@ void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* c
 						vida--;
 						if (vida)
 							trocaEstado(TRANSLADANDO);
+						else
+							trocaEstado(MORRENDO);
 					}
 					else
 						tempoEstado++;
+					break;
+				case MORRENDO:
+					y -= 8*fatorVelocidade;
+					tempoEstado++;
 					break;
 			}
 			break;
@@ -151,10 +212,16 @@ void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* c
 						vida--;
 						if (vida)
 							trocaEstado(TRANSLADANDO);
+						else
+							trocaEstado(MORRENDO);
 					}
 					else
 						tempoEstado++;
 					break;
+				case MORRENDO:
+					y -= 8*fatorVelocidade;
+					tempoEstado++;
+				break;
 			}
 			break;
 		case ARANHA:
@@ -197,7 +264,6 @@ void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* c
 						tempoEstado++;
 					break;
 				case PRESO:
-					cout << obstaculo1->ySuperior() << endl;
 					if (y < 0.4*HEIGHT)
 						trocaEstado(SOFRENDO_DANO);
 					else {
@@ -222,7 +288,13 @@ void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* c
 						vida--;
 						if (vida)
 							trocaEstado(TRANSLADANDO);
+						else
+							trocaEstado(MORRENDO);
 					}
+				break;
+				case MORRENDO:
+					y -= 8*fatorVelocidade;
+					tempoEstado++;
 				break;
 			}
 			break;

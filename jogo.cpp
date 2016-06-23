@@ -1,12 +1,11 @@
-#include "Obstaculo.h"
-#include "Personagem.h"
 #include "Fase.h"
 
 string str="000000010";
 float fatorVelocidade = 0.5;
+int tempoFase = 0;
 
 Personagem *lekinho;
-Fase *fase;
+Fase *fase; 
 
 void init() {
         
@@ -16,7 +15,7 @@ void init() {
 	glOrtho(0,WIDTH,0,HEIGHT,-100,100);
     
 	lekinho = new Personagem (LEKINHO, TERRESTRE, TRANSLADANDO, PISTA2, Y_LEKINHO, 0.06*HEIGHT, true, 1);
-	fase = new Fase (FLORESTA); //TESTE INICIANDO COM FLORESTA
+	fase = new Fase (); 
 }
 
 void print(int x, int y, string& string){
@@ -41,15 +40,33 @@ void idle(){
 	str.clear();
 	str = sstr.str();*/
 	fase->atualizarObstaculos(fatorVelocidade);
-	if (fase->getChefe()) {
-		fase->getChefe()->atualizar(lekinho->getX(), fatorVelocidade, fase->getChefe(), fase->getObstaculo1(), fase->getObstaculo2());
-			if (!fase->getChefe()->getVida())
+	fase->atualizarBonus(fatorVelocidade);
+	if (fase->getChefe())
+		fase->getChefe()->atualizar(lekinho->getX(), fatorVelocidade, fase->getChefe(), fase->getObstaculo1(), fase->getObstaculo2(),
+									fase->getBonus());
+	lekinho->atualizar(lekinho->getX(), fatorVelocidade, fase->getChefe(), fase->getObstaculo1(), fase->getObstaculo2(), fase->getBonus());
+	if (fase->getObstaculo1()->getY() < Y_FINAL) {
+		if (!fase->getChefe())
+			if (tempoFase > TEMPO_FASE_MAX) {
+				tempoFase = 0;
+				fase->iniciarChefe();
+			}
+		if (fase->getChefe() && !fase->getChefe()->getVida()) {
+			lekinho->setY(lekinho->getY() + 8*fatorVelocidade);
+			if (lekinho->getY() > Y_INICIAL) {
 				fase->terminarChefe();
+				fase = new Fase ();
+				lekinho->setY(Y_LEKINHO);
+			}
+		}
+		else
+			fase->renovarObstaculos();
+		if (!fase->getChefe())
+			fase->renovarBonus();
 	}
-	lekinho->atualizar(lekinho->getX(), fatorVelocidade, fase->getChefe(), fase->getObstaculo1(), fase->getObstaculo2());
-	if (fase->getObstaculo1()->getY() < Y_FINAL)
-		fase->renovarObstaculos();
 	fatorVelocidade+=0.0000001;
+	if (!fase->getChefe())
+		tempoFase++;
 	glutPostRedisplay();
 }
 
@@ -66,15 +83,6 @@ void keyboard(unsigned char tecla, int x, int y){
 			
 		//TESTE - APAGAR: apertar 1 para fase de floresta, 2 para fase de gelo e 3 para fase de deserto
 		case '1':
-			fase = new Fase (FLORESTA);
-			break;
-		case '2':
-			fase = new Fase (GELO);
-			break;
-		case '3':
-			fase = new Fase (DESERTO);
-			break;
-		case '4':
 			fase->iniciarChefe();
 			break;
 		//
@@ -91,6 +99,7 @@ void atualizarTela (Caracteristica caracteristica) {
 	desenha(fase->getObstaculo1()->getProjetil(), caracteristica);
 	desenha(fase->getObstaculo1(), caracteristica);
 	desenha(fase->getObstaculo2(), caracteristica);
+	desenha(fase->getBonus(), caracteristica);
 	if (fase->getChefe()) {
 		desenha(fase->getChefe()->getProjetil(), caracteristica);
 		desenha(fase->getChefe(), caracteristica);

@@ -15,7 +15,7 @@ void Elemento::desenha () {
 	glPushMatrix();
 		glTranslatef(x, y, 0);
 		switch (id) {
-			case LEKINHO: 			desenhaLekinho();							break;
+			case LEKINHO: 			desenhaLekinho(tempoEstado, estado);		break;
 			case PLANTA_CARNIVORA: 	desenhaPlantaCarnivora(tempoEstado); 		break;
 			case SAPO: 				desenhaSapo(); 								break;
 			case MINHOCA:			desenhaMinhoca(estado, tempoEstado);		break;
@@ -33,9 +33,16 @@ void Elemento::desenha () {
 			case TEIA:				desenhaTeia(faixay);						break;
 			case VERME:				desenhaVerme(tempoEstado, estado);			break;
 			case BONECO_NEVE:		desenhaBonecoDeNeve(tempoEstado, estado);	break;
-			case ARANHA:			desenhaAranha(tempoEstado, estado);
+			case ARANHA:			desenhaAranha(tempoEstado, estado);			break;
+			case ESCUDO:			desenhaEscudo();							break;
+			case INVENCIBILIDADE:	desenhaInvencibilidade();					break;
+			case PONTOS:			desenhaPontos();							break;
 		}
 	glPopMatrix();
+}
+
+Id Elemento::getId () {
+	return id;
 }
 
 Caracteristica Elemento::getCaracteristica () {

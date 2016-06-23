@@ -14,26 +14,33 @@
 #define NUM_PISTAS 3
 #define NUM_FASES 3
 #define Y_LEKINHO 50.0
+#define SELECAO_CENARIO rand()%3
+#define SELECAO_BONUS rand()%3
 #define PISTA_ALEATORIA (1 + 2*(rand()%3))*WIDTH/6.0
 #define OBSTACULO_ALEATORIO (this->obstaculos).at(rand()%(this->obstaculos).size())
 #define OBSTACULO_CHEFE (this->obstaculos).at(0)
-#define CENARIO_ALEATORIO rand()%NUM_FASES
 #define ATIVAR_EFEITO rand()%2?true:false
 #define Y_INICIAL HEIGHT+100
 #define Y_FINAL -100
+#define TEMPO_FASE_MAX 10000
 #define GERAR_OBSTACULO2 0.1*(rand()%11) <= 0.3
+#define GERAR_BONUS 0.1*(rand()%11) <= 0.1
 
 typedef enum {
 	LEKINHO, ARANHA, BONECO_NEVE, VERME,
 	PLANTA_CARNIVORA, SAPO, MINHOCA, TOCO,
 	ICEBERGS, GELO_QUEBRADO, URSO, LEAO_MARINHO, 
 	AREIA_MOVEDICA, CACTO, COBRA, LAGARTO, 
-	LINGUA, BOLA_NEVE, TEIA
+	LINGUA, BOLA_NEVE, TEIA,
+	ESCUDO, INVENCIBILIDADE, PONTOS
 } Id;
 
 typedef enum {AEREO, TERRESTRE, SUBTERRANEO} Caracteristica;
 
-typedef enum {SURGINDO, TRANSLADANDO, PARADO, PRESO, SOFRENDO_DANO, INICIANDO_ATAQUE, ATACANDO, COLIDINDO, MORRENDO} Estado;
+typedef enum {FLORESTA = 0, GELO = 1, DESERTO = 2} Cenario;
+
+typedef enum {SURGINDO, TRANSLADANDO, PARADO, PRESO, SOFRENDO_DANO, INICIANDO_ATAQUE, ATACANDO, COLIDINDO, MORRENDO, RECUPERANDO,
+				PROTEGIDO, INVENCIVEL, PROTEGIDO_E_INVENCIVEL} Estado;
 
 //GEOMETRIA
 void desenhaElipse();
@@ -44,7 +51,7 @@ void desenhaLinha();
 void desenhaQuadrilatero();
 
 //PERSONAGENS
-void desenhaLekinho();
+void desenhaLekinho(int, Estado);
 void desenhaBonecoDeNeve(int, Estado);
 void desenhaVerme(int, Estado);
 void desenhaAranha(int, Estado);
@@ -73,5 +80,10 @@ void desenhaLagarto(float);
 void desenhaLingua();
 void desenhaBolaDeNeve();
 void desenhaTeia(float);
+
+//BÔNUS
+void desenhaEscudo();
+void desenhaInvencibilidade();
+void desenhaPontos();
 
 # endif

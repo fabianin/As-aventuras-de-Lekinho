@@ -18,6 +18,7 @@ class Elemento {
 	public:
 		Elemento (Id, Caracteristica, Estado, float, float, float, bool);
 		void desenha ();
+		Id getId ();
 		Caracteristica getCaracteristica ();
 		float getX ();
 		float getY ();

@@ -1,8 +1,19 @@
 #include "Fase.h"
 
-Fase::Fase (Cenario cenario) {
+Fase::Fase () {
 	this->chefe = NULL;
-	this->cenario = cenario;
+	
+	switch (SELECAO_CENARIO) {
+		case 0:
+			this->cenario = FLORESTA;
+			break;
+		case 1:
+			this->cenario = GELO;
+			break;
+		case 2:
+			this->cenario = DESERTO;
+			break;
+	}
 	
 	switch (cenario) {
 		case FLORESTA:
@@ -34,6 +45,7 @@ Fase::Fase (Cenario cenario) {
 	}
 	
 	renovarObstaculos();
+	renovarBonus();
 }
 
 Obstaculo* Fase::getObstaculo1 () {
@@ -46,6 +58,10 @@ Obstaculo* Fase::getObstaculo2 () {
 
 Personagem* Fase::getChefe () {
 	return chefe;
+}
+
+Bonus* Fase::getBonus () {
+	return bonus;
 }
 
 void Fase::iniciarChefe () {
@@ -93,6 +109,26 @@ void Fase::renovarObstaculos () {
 	obstaculo1->setProjetil(NULL);
 }
 
+void Fase::renovarBonus () {
+	bonus = NULL;
+	if (GERAR_BONUS) {
+		float pistaBonus;
+		do pistaBonus = PISTA_ALEATORIA; while (pistaOcupada(pistaBonus));
+		switch (SELECAO_BONUS) {
+			case 0:
+				this->bonus = new Bonus (ESCUDO, TERRESTRE, TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0, true);
+				break;
+			case 1:
+				this->bonus = new Bonus (INVENCIBILIDADE, TERRESTRE, TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0, true);
+				break;
+			case 2:
+				this->bonus = new Bonus (PONTOS, TERRESTRE, TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0, true);
+				break;
+		}
+		bonus->setX(pistaBonus);
+	}
+}
+
 void Fase::atualizarObstaculos (float fatorVelocidade) {
 	if (obstaculo1->getProjetil())
 		obstaculo1->getProjetil()->atualizar(fatorVelocidade, pistaOcupada(PISTA1), pistaOcupada(PISTA2), pistaOcupada(PISTA3));
@@ -101,10 +137,19 @@ void Fase::atualizarObstaculos (float fatorVelocidade) {
 		obstaculo2->atualizar(fatorVelocidade, pistaOcupada(PISTA1), pistaOcupada(PISTA2), pistaOcupada(PISTA3));
 }
 
+void Fase::atualizarBonus (float fatorVelocidade) {
+	if (bonus)
+		if (bonus->foiColetado())
+			bonus = NULL;
+		else
+			bonus->atualizar(fatorVelocidade);
+}
+
 bool Fase::pistaOcupada (float pista) {
 	return 	(obstaculo1->getX() == pista) ||
 			(obstaculo2 != NULL && obstaculo2->getX() == pista) ||
-			(obstaculo1->getProjetil() != NULL && obstaculo1->getProjetil()->getX() == pista);
+			(obstaculo1->getProjetil() != NULL && obstaculo1->getProjetil()->getX() == pista) ||
+			(bonus != NULL && bonus->getX() == pista);
 }
 
 Fase::~Fase () {
