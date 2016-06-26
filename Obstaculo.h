@@ -6,10 +6,11 @@
 class Obstaculo: public Elemento {
 	
 	private:
+		bool podeAtivarEfeito;
 		Obstaculo* projetil;
 	
 	public:
-		Obstaculo (Id, Caracteristica, Estado, float, float, float, bool);
+		Obstaculo (Id, Caracteristica, Estado, float, float, float, bool, bool);
 		Obstaculo* getProjetil ();
 		void setProjetil (Obstaculo*);
 		void atualizar (float, bool, bool, bool);

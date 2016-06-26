@@ -263,7 +263,7 @@ void desenhaPlantaCarnivora (int tempoEstado) {
 		desenhaElipse(0, -0.08, 0.045, 0.035);
 		glColor3f(0.5, 0.7, 0.5);
 		desenhaTriangulo(-0.012, -0.035,  0.000, -0.09,  0.012, -0.035);
-		desenhaTriangulo(-0.024, -0.035, -0.024, -0.09, -0.012, -0.035);
+		desenhaTriangulo(-0.036, -0.035, -0.024, -0.09, -0.012, -0.035);
 		desenhaTriangulo( 0.012, -0.035,  0.024, -0.09,  0.036, -0.035); 
 	}
 }
@@ -397,10 +397,12 @@ void desenhaAranha (int tempoEstado, Estado estado) {
 	bool virada = false;
 	if (estado == MORRENDO)
 		virada = true;
-	int fatorVelocMovPatas = (estado == PRESO)? 1 : 10;
+	int fatorVelocMovPatas = (int) (5/fatorVelocidade);
+	if (estado == PRESO || fatorVelocMovPatas < 1)
+		fatorVelocMovPatas = 1;
 	int anguloAberturaQueliceras = 0;
 	float pataMovimento1 = -0.06 + 0.04*((tempoEstado/fatorVelocMovPatas)%2);
-	float pataMovimento2 = 0.02 + 0.04*((tempoEstado/fatorVelocMovPatas)%2);
+	float pataMovimento2 =  0.02 + 0.04*((tempoEstado/fatorVelocMovPatas)%2);
 	int ladoPataMovimento = (tempoEstado/5)%2? 1 : -1;
 	if (estado == SURGINDO || estado == TRANSLADANDO ||
 		estado == INICIANDO_ATAQUE && (tempoEstado/10)%2)
@@ -508,7 +510,7 @@ void desenhaVerme (int tempoEstado, Estado estado) {
 	desenhaQuadrilatero(-0.08, 0, 0.08, 0, 0.08, -50/HEIGHT, -0.08, -50/HEIGHT);
 	glColor3f(1, 1, 0);
 	for (int i = 0; i >= -50; i -= 15)
-		desenhaLinha(-0.08, (i - tempoEstado%10)/HEIGHT, 0.08, (i - tempoEstado%10)/HEIGHT, 1);
+		desenhaLinha(-0.08, (i - 2*fatorVelocidade*(tempoEstado%10))/HEIGHT, 0.08, (i - 2*fatorVelocidade*(tempoEstado%10))/HEIGHT, 1);
 	if (estado == INICIANDO_ATAQUE) {
 		desenhaCirculo(0, 0, 0.01*((tempoEstado/2)%8));
 		desenhaCirculo(0, 0, 0.01*((tempoEstado/2)%4));
@@ -541,9 +543,9 @@ void desenhaVerme (int tempoEstado, Estado estado) {
 }
 
 void desenhaLekinho (int tempoEstado, Estado estado) {
-	if ((estado != INVENCIVEL && estado != RECUPERANDO && estado != PROTEGIDO_E_INVENCIVEL) || (tempoEstado/10)%2) {
+	if ((estado != INVENCIVEL && estado != RECUPERANDO && estado != PROTEGIDO_E_INVENCIVEL) || (tempoEstado/5)%2) {
 		glPushMatrix();
-			//glRotatef(anguloMovimento, 1, 0, 0);
+			glRotatef(15*tempoEstado*fatorVelocidade, 1, 0, 0);
 		
 			glColor3f(1, 0.8, 0.6);
 			desenhaQuadrilatero(0.05, 0, 0.07, 0, 0.07, 0.08, 0.05, 0.08); //braço direito
@@ -556,7 +558,7 @@ void desenhaLekinho (int tempoEstado, Estado estado) {
 		glPopMatrix();
 		
 		glPushMatrix();
-			//glRotatef(-anguloMovimento, 1, 0, 0); 
+			glRotatef(-15*tempoEstado*fatorVelocidade, 1, 0, 0); 
 		
 			glColor3f(1, 0.8, 0.6);
 			desenhaQuadrilatero(-0.05, 0, -0.07, 0, -0.07, -0.08, -0.05, -0.08); //braço esquerdo
@@ -582,22 +584,60 @@ void desenhaLekinho (int tempoEstado, Estado estado) {
 	
 	}	
 	if (estado == PROTEGIDO || estado == PROTEGIDO_E_INVENCIVEL) {
+		glLineWidth(5);
 		glColor3f(0, 1, 0);
 		desenhaCircunferencia(0, 0, 0.1);
+		glLineWidth(1);
 	}
 }
 
-void desenhaEscudo () {
-	glColor3f(0, 1, 0);
-	desenhaCirculo(0, 0, 0.035);
+void desenhaEscudo (int tempoEstado) {
+	if ((tempoEstado/5)%2) {
+		glColor3f(0, 1, 0);
+		desenhaQuadrilatero(-0.04, 0.07, 0.04, 0.07, 0.04, 0.11, -0.04, 0.11);
+		desenhaQuadrilatero(-0.07, -0.07, 0.07, -0.07, 0.07, 0.07, -0.07, 0.07);
+		desenhaTriangulo(-0.07, -0.07, 0, -0.14, 0.07, -0.07);
+	}
 }
 
-void desenhaInvencibilidade () {
-	glColor3f(1, 1, 0);
-	desenhaCirculo(0, 0, 0.035);
+void desenhaInvencibilidade (int tempoEstado) {
+	if ((tempoEstado/5)%2) {
+		glColor3f(1, 1, 0);
+		desenhaQuadrilatero(-0.06, 0.04, 0, 0.04, 0, 0.12, -0.06, 0.12);
+		desenhaQuadrilatero(-0.03, -0.04, 0.03, -0.04, 0.03, 0.04, -0.03, 0.04);
+		desenhaTriangulo(0, -0.04, 0, -0.15, 0.06, -0.04);
+	}
 }
 
-void desenhaPontos () {
-	glColor3f(1, 0, 0);
-	desenhaCirculo(0, 0, 0.035);
+void desenhaPontos (int tempoEstado) {
+	if ((tempoEstado/5)%2) {
+		glColor3f(1, 0, 0);
+		desenhaQuadrilatero(-0.15, -0.015, -0.09, -0.015, -0.09, 0.015, -0.15, 0.015);
+		desenhaQuadrilatero(-0.13, -0.045, -0.11, -0.045, -0.11, 0.045, -0.13, 0.045);
+		
+		desenhaQuadrilatero(-0.07,  0.045, -0.01,  0.045, -0.01,  0.075, -0.07,  0.075);
+		desenhaQuadrilatero(-0.07, -0.015, -0.05, -0.015, -0.05,  0.075, -0.07,  0.075);
+		desenhaQuadrilatero(-0.07, -0.015, -0.01, -0.015, -0.01,  0.015, -0.07,  0.015);
+		desenhaQuadrilatero(-0.03, -0.075, -0.01, -0.075, -0.01,  0.015, -0.03,  0.015);
+		desenhaQuadrilatero(-0.07, -0.045, -0.01, -0.045, -0.01, -0.075, -0.07, -0.075);
+		
+		desenhaQuadrilatero(0.01,  0.045, 0.07,  0.045, 0.07,  0.075, 0.01,  0.075);
+		desenhaQuadrilatero(0.01, -0.075, 0.03, -0.075, 0.03,  0.075, 0.01,  0.075);
+		desenhaQuadrilatero(0.05, -0.075, 0.07, -0.075, 0.07,  0.075, 0.05,  0.075);
+		desenhaQuadrilatero(0.01, -0.045, 0.07, -0.045, 0.07, -0.075, 0.01, -0.075);
+		
+		desenhaQuadrilatero(0.09, 0.045,  0.15, 0.045,  0.15,  0.075, 0.09,  0.075);
+		desenhaQuadrilatero(0.09, -0.075, 0.11, -0.075, 0.11,  0.075, 0.09,  0.075);
+		desenhaQuadrilatero(0.13, -0.075, 0.15, -0.075, 0.15,  0.075, 0.13,  0.075);
+		desenhaQuadrilatero(0.09, -0.045, 0.15, -0.045, 0.15, -0.075, 0.09, -0.075);
+	}
+}
+
+void desenhaQuadro () {
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f(0, 0, 0, 0.4);
+	desenhaQuadrilatero(1/12.0, 1/8.0, 11/12.0, 1/8.0, 11/12.0, 7/8.0, 1/12.0, 7/8.0);
+	glDisable(GL_BLEND);
+	glColor3f(1, 1, 1);
 }

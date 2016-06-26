@@ -34,9 +34,9 @@ void Elemento::desenha () {
 			case VERME:				desenhaVerme(tempoEstado, estado);			break;
 			case BONECO_NEVE:		desenhaBonecoDeNeve(tempoEstado, estado);	break;
 			case ARANHA:			desenhaAranha(tempoEstado, estado);			break;
-			case ESCUDO:			desenhaEscudo();							break;
-			case INVENCIBILIDADE:	desenhaInvencibilidade();					break;
-			case PONTOS:			desenhaPontos();							break;
+			case ESCUDO:			desenhaEscudo(tempoEstado);					break;
+			case INVENCIBILIDADE:	desenhaInvencibilidade(tempoEstado);		break;
+			case PONTOS:			desenhaPontos(tempoEstado);					break;
 		}
 	glPopMatrix();
 }

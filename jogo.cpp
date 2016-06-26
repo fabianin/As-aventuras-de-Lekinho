@@ -1,91 +1,163 @@
 #include "Fase.h"
 
-string str="000000010";
-float fatorVelocidade = 0.5;
-int tempoFase = 0;
+fstream arquivoPontuacao;
+
+float fatorVelocidade;	
+float tempoPontuacao;
+int tempoFase;
+bool pausa;
+long long int pontuacao;
+long long int pontuacaoMaisAlta = 0;
+bool fimJogo;
+bool sim;
+MenuPausa menuPausa;
 
 Personagem *lekinho;
-Fase *fase; 
+Fase *fase;
+
+void iniciarJogo () {
+	fatorVelocidade = 0.5;	
+	tempoPontuacao = 0;
+	tempoFase = 0;
+	pausa = false;
+	pontuacao = 0;
+	fimJogo = false;
+	sim = true;
+	menuPausa = CONTINUAR;
+	lekinho = new Personagem (LEKINHO, TERRESTRE, TRANSLADANDO, PISTA2, Y_LEKINHO, 0.06*HEIGHT, true, 1);
+	fase = new Fase ();
+}
+	
 
 void init() {
-        
+	if (ifstream ("Pontuacao.bin")) {
+		arquivoPontuacao.open ("Pontuacao.bin", ios::in);
+		arquivoPontuacao >> pontuacaoMaisAlta;
+		arquivoPontuacao.close();
+	}
+      
 	srand(time(NULL));
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0,WIDTH,0,HEIGHT,-100,100);
     
-	lekinho = new Personagem (LEKINHO, TERRESTRE, TRANSLADANDO, PISTA2, Y_LEKINHO, 0.06*HEIGHT, true, 1);
-	fase = new Fase (); 
+    iniciarJogo();
 }
 
-void print(int x, int y, string& string){
-	glPushMatrix();
-		glColor3f(1,1,0);
-		glRasterPos2f(x,y);
-		int len = (int) string.size();
-		for (int i = 0; i < len; i++){
-			glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,string[i]);
-		}
-	glPopMatrix();
+void atualizarPontuacao () {
+	float tempoPontuacaoAnterior = tempoPontuacao;
+	tempoPontuacao += 8*fatorVelocidade;
+	if (TRANSLADOU_50 && pontuacao != 9999999999)
+		pontuacao++;
+}
+
+void salvarRecord () {
+	if (pontuacao > pontuacaoMaisAlta)
+		pontuacaoMaisAlta = pontuacao;
+	arquivoPontuacao.open ("Pontuacao.bin", ios::out);
+	arquivoPontuacao << pontuacaoMaisAlta;
+	arquivoPontuacao.close();
 }
 
 void idle(){
-	/*stringstream sstr;
-	int a;
-	sstr.clear();
-	sstr << str;
-	sstr >> a;
-	a++;
-	sstr << a;
-	str.clear();
-	str = sstr.str();*/
-	fase->atualizarObstaculos(fatorVelocidade);
-	fase->atualizarBonus(fatorVelocidade);
-	if (fase->getChefe())
-		fase->getChefe()->atualizar(lekinho->getX(), fatorVelocidade, fase->getChefe(), fase->getObstaculo1(), fase->getObstaculo2(),
-									fase->getBonus());
-	lekinho->atualizar(lekinho->getX(), fatorVelocidade, fase->getChefe(), fase->getObstaculo1(), fase->getObstaculo2(), fase->getBonus());
-	if (fase->getObstaculo1()->getY() < Y_FINAL) {
-		if (!fase->getChefe())
-			if (tempoFase > TEMPO_FASE_MAX) {
-				tempoFase = 0;
-				fase->iniciarChefe();
-			}
-		if (fase->getChefe() && !fase->getChefe()->getVida()) {
-			lekinho->setY(lekinho->getY() + 8*fatorVelocidade);
-			if (lekinho->getY() > Y_INICIAL) {
-				fase->terminarChefe();
-				fase = new Fase ();
-				lekinho->setY(Y_LEKINHO);
-			}
+	if (!pausa && !fimJogo) {
+		fase->atualizarObstaculos(fatorVelocidade);
+		
+		atualizarPontuacao();
+		
+		fase->atualizarBonus(fatorVelocidade);
+		
+		if (fase->getChefe())
+			fase->getChefe()->atualizar(lekinho->getX(), fatorVelocidade, fase->getChefe(), fase->getObstaculo1(), fase->getObstaculo2(),
+										fase->getBonus());
+										
+		lekinho->atualizar(lekinho->getX(), fatorVelocidade, fase->getChefe(), fase->getObstaculo1(), fase->getObstaculo2(), fase->getBonus());
+		if (!lekinho->getVida()) {
+			fimJogo = true;
+			salvarRecord();
 		}
-		else
-			fase->renovarObstaculos();
-		if (!fase->getChefe())
-			fase->renovarBonus();
+		else {
+			if (fase->getObstaculo1()->getY() < Y_FINAL) {
+				if (!fase->getChefe())
+					if (tempoFase > TEMPO_FASE_MAX) {
+						tempoFase = 0;
+						fase->iniciarChefe();
+					}
+				if (fase->getChefe() && !fase->getChefe()->getVida()) {
+					lekinho->setY(lekinho->getY() + 8*fatorVelocidade);
+					if (lekinho->getY() > Y_INICIAL) {
+						fase->terminarChefe();
+						fase = new Fase ();
+						lekinho->setY(Y_LEKINHO);
+					}
+				}
+				else
+					fase->renovarObstaculos();
+				if (!fase->getChefe())
+					fase->renovarBonus();
+			}
+			fatorVelocidade += INCREMENTO_VELOCIDADE;
+			if (!fase->getChefe())
+				tempoFase++;
+		}
 	}
-	fatorVelocidade+=0.0000001;
-	if (!fase->getChefe())
-		tempoFase++;
 	glutPostRedisplay();
 }
 
 void keyboard(unsigned char tecla, int x, int y){
 	switch(tecla){
+		case 'D':
 		case 'd':
-			if(lekinho->getX() < PISTA3)
-				lekinho->setX(lekinho->getX() + TAM_PISTA);
+			if (!pausa && !fimJogo)
+				if(lekinho->getX() < PISTA3)
+					lekinho->setX(lekinho->getX() + TAM_PISTA);
 			break;
+		case 'A':
 		case 'a':
-			if(lekinho->getX() > PISTA1)
-				lekinho->setX(lekinho->getX() - TAM_PISTA);
+			if (!pausa && !fimJogo)
+				if(lekinho->getX() > PISTA1)
+					lekinho->setX(lekinho->getX() - TAM_PISTA);
 			break;
-			
-		//TESTE - APAGAR: apertar 1 para fase de floresta, 2 para fase de gelo e 3 para fase de deserto
-		case '1':
-			fase->iniciarChefe();
+		case 's':
+		case 'S':
+			if (pausa)
+				if (menuPausa == CONTINUAR)
+					menuPausa = REINICIAR;
+				else if (menuPausa == REINICIAR)
+					menuPausa = SAIR;
+			if (fimJogo && sim)
+				sim = !sim;
 			break;
-		//
+		case 'w':
+		case 'W':
+			if (pausa)
+				if (menuPausa == SAIR)
+					menuPausa = REINICIAR;
+				else if (menuPausa == REINICIAR)
+					menuPausa = CONTINUAR;
+			if (fimJogo && !sim)
+				sim = !sim;
+			break;
+		case ENTER:
+			if (!pausa)
+				pausa = true;
+			else
+				if (menuPausa == CONTINUAR)
+					pausa = false;
+				else if (menuPausa == REINICIAR) {
+					salvarRecord();
+					iniciarJogo();
+				}
+				else if (menuPausa == SAIR) {
+					salvarRecord();
+					exit(0);
+				}
+			if (fimJogo)
+				if (sim)
+					iniciarJogo();
+				else
+					exit(0);
+			break;
 	}
 	glutPostRedisplay();
 }
@@ -107,18 +179,100 @@ void atualizarTela (Caracteristica caracteristica) {
 	desenha(lekinho, caracteristica);
 }
 
+string zerosEsquerda (int pontos) {
+	string zeros ("");
+	int contaAlgarismos = 0;
+	if (!pontos)
+		contaAlgarismos = 1;
+	while (pontos) {
+		contaAlgarismos++;
+		pontos /= 10;
+	}
+	for (int i = 0; i < 10 - contaAlgarismos; i++)
+		zeros.push_back('0');
+	return zeros;
+} 
+
+void geraViewportTexto (float xTexto, float yTexto, string texto, void* fonte) {
+	glRasterPos2f(xTexto, yTexto);
+	for (int i = 0; i < texto.length(); i++){
+		glutBitmapCharacter(fonte, texto[i]);
+	}
+}
+
+void geraViewportPontuacao (float x, float y, float xTexto, string texto, void* fonte, bool imprimirPontos, int pontos = 0) {
+	glViewport(x, y, WIDTH/2, 20);
+	stringstream ssTexto;
+	ssTexto << texto;
+	if (imprimirPontos)
+		ssTexto << zerosEsquerda(pontos) << pontos;
+	string stexto = ssTexto.str();
+	geraViewportTexto(xTexto, 0, stexto, fonte);
+}
+
+void geraViewportFimJogo () {
+	glTranslatef(0, 0, 0);
+	desenhaQuadro();
+	glViewport(WIDTH/12, HEIGHT/8, 5*WIDTH/6, 3*HEIGHT/4);
+	glColor3f(1, 1, 1);
+	geraViewportTexto(0.35*WIDTH, 0.8*HEIGHT, "FIM DE JOGO", GLUT_BITMAP_TIMES_ROMAN_24);
+	geraViewportTexto(0.32*WIDTH, 0.55*HEIGHT, "Tentar novamente?", GLUT_BITMAP_TIMES_ROMAN_24);
+	if (sim)
+		glColor3f(1, 1, 0);
+	else
+		glColor3f(1, 1, 1);
+	geraViewportTexto(0.46*WIDTH, 0.35*HEIGHT, "Sim", GLUT_BITMAP_TIMES_ROMAN_24);
+	if (!sim)
+		glColor3f(1, 1, 0);
+	else
+		glColor3f(1, 1, 1);
+	geraViewportTexto(0.46*WIDTH, 0.15*HEIGHT, "Nao", GLUT_BITMAP_TIMES_ROMAN_24);
+}
+
+void geraViewportPausa () {
+	glTranslatef(0, 0, 0);
+	desenhaQuadro();
+	glViewport(WIDTH/12, HEIGHT/8, 5*WIDTH/6, 3*HEIGHT/4);
+	glColor3f(1, 1, 1);
+	geraViewportTexto(0.43*WIDTH, 0.8*HEIGHT, "PAUSA", GLUT_BITMAP_TIMES_ROMAN_24);
+	if (menuPausa == CONTINUAR)
+		glColor3f(1, 1, 0);
+	else
+		glColor3f(1, 1, 1);
+	geraViewportTexto(0.41*WIDTH, 0.55*HEIGHT, "Continuar", GLUT_BITMAP_TIMES_ROMAN_24);
+	if (menuPausa == REINICIAR)
+		glColor3f(1, 1, 0);
+	else
+		glColor3f(1, 1, 1);
+	geraViewportTexto(0.42*WIDTH, 0.35*HEIGHT, "Reiniciar", GLUT_BITMAP_TIMES_ROMAN_24);
+	if (menuPausa == SAIR)
+		glColor3f(1, 1, 0);
+	else
+		glColor3f(1, 1, 1);
+	geraViewportTexto(0.46*WIDTH, 0.15*HEIGHT, "Sair", GLUT_BITMAP_TIMES_ROMAN_24);
+}
+
 void display(){
 	glClear(GL_COLOR_BUFFER_BIT);
-
-	glPushMatrix();
-		print(490,380,str);
-	glPopMatrix();
 	
+	glViewport(0, 0, WIDTH, HEIGHT);
 	
 	atualizarTela (SUBTERRANEO);
 	atualizarTela (TERRESTRE);
 	atualizarTela (AEREO);
 
+	if (fimJogo)
+		geraViewportFimJogo();
+	
+	if (pausa)
+		geraViewportPausa();
+
+	glColor3f(1,1,1);
+	geraViewportPontuacao(0, HEIGHT - 20, 10, "PONTUACAO:", GLUT_BITMAP_HELVETICA_18, false);
+	geraViewportPontuacao(0, HEIGHT - 45, 10, "", GLUT_BITMAP_TIMES_ROMAN_24, true, pontuacao); 
+	geraViewportPontuacao(WIDTH/2, HEIGHT - 20, WIDTH/5, "PONTUACAO MAIS ALTA:", GLUT_BITMAP_HELVETICA_18, false); 
+	geraViewportPontuacao(WIDTH/2, HEIGHT - 45, 0.55*WIDTH, "", GLUT_BITMAP_TIMES_ROMAN_24, true, pontuacaoMaisAlta);
+	
 	glutSwapBuffers();
 }
 
@@ -130,7 +284,7 @@ int main(int argc,char** argv){
 	glutCreateWindow("As aventuras de Lekinho");
 	init();
 	glutDisplayFunc(display);
-	glutKeyboardFunc(keyboard);
 	glutIdleFunc(idle);
+	glutKeyboardFunc(keyboard);
 	glutMainLoop();
 }

@@ -19,27 +19,27 @@ Fase::Fase () {
 		case FLORESTA:
 			glClearColor(0, 0.5, 0, 0);
 			
-			this->obstaculos.push_back(new Obstaculo (MINHOCA, 			SUBTERRANEO,	TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.08*WIDTH, 	false));
-			this->obstaculos.push_back(new Obstaculo (PLANTA_CARNIVORA, TERRESTRE, 		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.14*WIDTH, 	true));
-			this->obstaculos.push_back(new Obstaculo (SAPO, 			TERRESTRE, 		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.30*HEIGHT,	true));
-			this->obstaculos.push_back(new Obstaculo (TOCO, 			TERRESTRE, 		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.16*WIDTH, 	true));
+			this->obstaculos.push_back(new Obstaculo (MINHOCA, 			SUBTERRANEO,	TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.08*WIDTH, 	false, true));
+			this->obstaculos.push_back(new Obstaculo (PLANTA_CARNIVORA, TERRESTRE, 		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.14*WIDTH, 	true, false));
+			this->obstaculos.push_back(new Obstaculo (SAPO, 			TERRESTRE, 		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.30*HEIGHT,	true, true));
+			this->obstaculos.push_back(new Obstaculo (TOCO, 			TERRESTRE, 		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.16*WIDTH, 	true, false));
 			
 			break;
 		case GELO:
 			glClearColor(0.8, 0.8, 1, 0);
-			this->obstaculos.push_back(new Obstaculo (GELO_QUEBRADO,	SUBTERRANEO,	TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.30*HEIGHT, 	false));
-			this->obstaculos.push_back(new Obstaculo (ICEBERGS, 		TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.30*HEIGHT,	true));
-			this->obstaculos.push_back(new Obstaculo (URSO, 			TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.30*WIDTH, 	true));
-			this->obstaculos.push_back(new Obstaculo (LEAO_MARINHO, 	TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.16*WIDTH, 	true));
+			this->obstaculos.push_back(new Obstaculo (GELO_QUEBRADO,	SUBTERRANEO,	TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.30*HEIGHT, 	false, true));
+			this->obstaculos.push_back(new Obstaculo (ICEBERGS, 		TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.30*HEIGHT,	true, false));
+			this->obstaculos.push_back(new Obstaculo (URSO, 			TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.30*WIDTH, 	true, false));
+			this->obstaculos.push_back(new Obstaculo (LEAO_MARINHO, 	TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.16*WIDTH, 	true, false));
 			
 			break;
 		case DESERTO:
 			glClearColor(0.6, 0.5, 0, 0);
 			
-			this->obstaculos.push_back(new Obstaculo (CACTO, 			TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.10*WIDTH, 	true));
-			this->obstaculos.push_back(new Obstaculo (AREIA_MOVEDICA, 	SUBTERRANEO,	TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.20*WIDTH, 	true));
-			this->obstaculos.push_back(new Obstaculo (COBRA, 			TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.20*WIDTH, 	true));
-			this->obstaculos.push_back(new Obstaculo (LAGARTO, 			TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.10*HEIGHT, 	true));
+			this->obstaculos.push_back(new Obstaculo (CACTO, 			TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.10*WIDTH, 	true, false));
+			this->obstaculos.push_back(new Obstaculo (AREIA_MOVEDICA, 	SUBTERRANEO,	TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.20*WIDTH, 	true, false));
+			this->obstaculos.push_back(new Obstaculo (COBRA, 			TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.20*WIDTH, 	true, false));
+			this->obstaculos.push_back(new Obstaculo (LAGARTO, 			TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.10*HEIGHT, 	true, true));
 			
 			break;
 	}
@@ -116,13 +116,13 @@ void Fase::renovarBonus () {
 		do pistaBonus = PISTA_ALEATORIA; while (pistaOcupada(pistaBonus));
 		switch (SELECAO_BONUS) {
 			case 0:
-				this->bonus = new Bonus (ESCUDO, TERRESTRE, TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0, true);
+				this->bonus = new Bonus (ESCUDO, TERRESTRE, TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.22*HEIGHT, true);
 				break;
 			case 1:
-				this->bonus = new Bonus (INVENCIBILIDADE, TERRESTRE, TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0, true);
+				this->bonus = new Bonus (INVENCIBILIDADE, TERRESTRE, TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.24*HEIGHT, true);
 				break;
 			case 2:
-				this->bonus = new Bonus (PONTOS, TERRESTRE, TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0, true);
+				this->bonus = new Bonus (PONTOS, TERRESTRE, TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.15*HEIGHT, true);
 				break;
 		}
 		bonus->setX(pistaBonus);

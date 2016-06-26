@@ -59,6 +59,9 @@ void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* c
 						else
 							trocaEstado(PROTEGIDO_E_INVENCIVEL);
 						break;
+					case PONTOS:
+						pontuacao += 500;
+						break;
 				}
 			}
 			switch (estado) {
@@ -67,8 +70,9 @@ void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* c
 						colide = true;
 					if (colideCom(obstaculo1) || colideCom(obstaculo1->getProjetil()) || colideCom(obstaculo2) || colideCom(chefe) ||
 						(chefe && colideCom(chefe->getProjetil())))
-						exit(0);
-					tempoEstado++;
+						vida--;
+					else
+						tempoEstado++;
 					break;
 				case PROTEGIDO:
 					if (tempoEstado == 0)
@@ -108,8 +112,10 @@ void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* c
 			switch (estado) {
 				case SURGINDO:
 					y += 8*fatorVelocidade;
-					if (y >= Y_LEKINHO)
+					if (y >= Y_LEKINHO) {
+						y = Y_LEKINHO;
 						trocaEstado(TRANSLADANDO);
+					}
 					else {
 						x = xLekinho;
 						tempoEstado++;
@@ -144,6 +150,8 @@ void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* c
 						tempoEstado++;
 					break;
 				case COLIDINDO:
+					if (colideCom(obstaculo1))
+						obstaculo1->trocaEstado(COLIDINDO);
 					if (tempoEstado == 70) {
 						vida--;
 						if (vida)
@@ -166,8 +174,10 @@ void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* c
 			switch (estado) {
 				case SURGINDO:
 					y -= 8*fatorVelocidade;
-					if (y <= 0.7*HEIGHT)
+					if (y <= 0.7*HEIGHT) {
+						y = 0.7*HEIGHT;
 						trocaEstado(TRANSLADANDO);
+					}
 					else {
 						x = xLekinho;
 						tempoEstado++;
@@ -197,7 +207,7 @@ void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* c
 					break;
 				case ATACANDO:
 					if (tempoEstado == 0)
-						projetil = new Obstaculo (BOLA_NEVE, AEREO, TRANSLADANDO, x, y - 0.33*HEIGHT, 0.07*WIDTH, true);
+						projetil = new Obstaculo (BOLA_NEVE, AEREO, TRANSLADANDO, x, y - 0.33*HEIGHT, 0.07*WIDTH, true, false);
 					if (colideCom(obstaculo1))
 						trocaEstado(COLIDINDO);
 					if (projetil->getY() < Y_FINAL)
@@ -236,8 +246,10 @@ void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* c
 					}
 					break;
 				case TRANSLADANDO:
-					if (tempoEstado == 0)
+					if (tempoEstado == 0) {
+						y = 0.9*HEIGHT;
 						projetil = NULL;
+					}
 					if (tempoEstado == 180)
 						trocaEstado(INICIANDO_ATAQUE);
 					else {
@@ -253,18 +265,29 @@ void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* c
 					break;
 				case ATACANDO:
 					if (tempoEstado == 0)
-						projetil = new Obstaculo (TEIA, TERRESTRE, PARADO, x, 0.5*HEIGHT, HEIGHT, true);
+						projetil = new Obstaculo (TEIA, TERRESTRE, PARADO, x, 0.5*HEIGHT, HEIGHT, true, false);
 					if (projetil->colideCom(obstaculo1)) {
+						projetil->setPodeColidir(false);
 						trocaEstado(PRESO);
 						obstaculo1->trocaEstado(PRESO);
 					}
+					else if (x == xLekinho) {
+						projetil->setFaixaY(HEIGHT - Y_LEKINHO);
+						projetil->setY(0.5*(HEIGHT + Y_LEKINHO));
+					}
+					else {
+						projetil->setFaixaY(HEIGHT);
+						projetil->setY(0.5*HEIGHT);
+					}
 					if (tempoEstado == 100)
 						trocaEstado(TRANSLADANDO);
-					else
+					else if (estado == ATACANDO)
 						tempoEstado++;
 					break;
 				case PRESO:
-					if (y < 0.4*HEIGHT)
+					if (tempoEstado == 0)
+						projetil->setPodeColidir(true);
+					if (y <= 0.4*HEIGHT)
 						trocaEstado(SOFRENDO_DANO);
 					else {
 						float inferiorTeia = obstaculo1->ySuperior();
@@ -280,11 +303,10 @@ void Personagem::atualizar (float xLekinho, float fatorVelocidade, Personagem* c
 					if (tempoEstado == 0)
 						projetil = NULL;
 					if (y < 0.9*HEIGHT) {
-						y += 8*fatorVelocidade;
+						y += HEIGHT/100;
 						tempoEstado++;
 					}
 					else {
-						y = 0.9*HEIGHT;
 						vida--;
 						if (vida)
 							trocaEstado(TRANSLADANDO);

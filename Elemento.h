@@ -3,8 +3,6 @@
 
 #include "Desenho.h"
 
-using namespace std;
-
 class Elemento {
 	
 	protected:

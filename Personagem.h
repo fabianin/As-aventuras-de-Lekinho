@@ -4,6 +4,8 @@
 #include "Bonus.h"
 #include "Obstaculo.h"
 
+extern long long int pontuacao;
+
 class Personagem: public Elemento {
 
 	private:
