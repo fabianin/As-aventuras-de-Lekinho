@@ -1,3 +1,4 @@
+#include "SOIL.h"
 #include "Fase.h"
 
 fstream arquivoPontuacao;
@@ -158,6 +159,44 @@ void keyboard(unsigned char tecla, int x, int y){
 				else
 					exit(0);
 			break;
+		//CHEAT
+		case '1':
+			fase->iniciarChefe();
+			break;
+	}
+	glutPostRedisplay();
+}
+
+void setas (int tecla, int x, int y) {
+	switch(tecla){
+		case GLUT_KEY_RIGHT:
+			if (!pausa && !fimJogo)
+				if(lekinho->getX() < PISTA3)
+					lekinho->setX(lekinho->getX() + TAM_PISTA);
+			break;
+		case GLUT_KEY_LEFT:
+			if (!pausa && !fimJogo)
+				if(lekinho->getX() > PISTA1)
+					lekinho->setX(lekinho->getX() - TAM_PISTA);
+			break;
+		case GLUT_KEY_DOWN:
+			if (pausa)
+				if (menuPausa == CONTINUAR)
+					menuPausa = REINICIAR;
+				else if (menuPausa == REINICIAR)
+					menuPausa = SAIR;
+			if (fimJogo && sim)
+				sim = !sim;
+			break;
+		case GLUT_KEY_UP:
+			if (pausa)
+				if (menuPausa == SAIR)
+					menuPausa = REINICIAR;
+				else if (menuPausa == REINICIAR)
+					menuPausa = CONTINUAR;
+			if (fimJogo && !sim)
+				sim = !sim;
+			break;
 	}
 	glutPostRedisplay();
 }
@@ -286,5 +325,6 @@ int main(int argc,char** argv){
 	glutDisplayFunc(display);
 	glutIdleFunc(idle);
 	glutKeyboardFunc(keyboard);
+	glutSpecialFunc(setas);
 	glutMainLoop();
 }
