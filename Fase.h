@@ -1,8 +1,8 @@
 #ifndef FASE_H
 #define FASE_H
-
 #include "Texture.h"
 #include "Personagem.h"
+
 
 extern string imagem;
 extern FILE *textura;

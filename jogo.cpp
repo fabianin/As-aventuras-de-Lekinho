@@ -1,4 +1,6 @@
 #include "Fase.h"
+#include "OpenAL.h"
+
 
 fstream arquivoPontuacao;
 
@@ -34,6 +36,8 @@ void iniciarJogo () {
 	menuPausa = CONTINUAR;
 	lekinho = new Personagem (LEKINHO, TERRESTRE, TRANSLADANDO, PISTA2, Y_LEKINHO, 0.06*HEIGHT, true, 1);
 	fase = new Fase ();
+	alSourcePlay(Sources[GAME]);
+	
 }
 	
 
@@ -60,14 +64,21 @@ void atualizarPontuacao () {
 }
 
 void salvarRecord () {
-	if (pontuacao > pontuacaoMaisAlta)
+	if (pontuacao > pontuacaoMaisAlta){
+		alSourcePlay(Sources[RECORD]);
 		pontuacaoMaisAlta = pontuacao;
+	}
 	arquivoPontuacao.open ("Pontuacao.bin", ios::out | ios::binary);
 	arquivoPontuacao << pontuacaoMaisAlta;
 	arquivoPontuacao.close();
 }
 
 void idle(){
+	// int t_i = glutGet(GLUT_ELAPSED_TIME);
+	// int t_f =glutGet(GLUT_ELAPSED_TIME);
+	// while(t_f - t_i<30){
+	// 	t_f = glutGet(GLUT_ELAPSED_TIME);
+	// }
 	if (!pausa && !fimJogo) {
 		fase->atualizarObstaculos(fatorVelocidade);
 		
@@ -81,6 +92,7 @@ void idle(){
 										
 		lekinho->atualizar(lekinho->getX(), fatorVelocidade, fase->getChefe(), fase->getObstaculo1(), fase->getObstaculo2(), fase->getBonus());
 		if (!lekinho->getVida()) {
+			alSourcePause(Sources[GAME]);
 			fimJogo = true;
 			salvarRecord();
 		}
@@ -90,6 +102,7 @@ void idle(){
 					if (tempoFase > TEMPO_FASE_MAX) {
 						tempoFase = 0;
 						fase->iniciarChefe();
+
 					}
 				if (fase->getChefe() && !fase->getChefe()->getVida() && fase->getChefe()->getY() < Y_FINAL) {
 					moverCenario = false;
@@ -123,14 +136,18 @@ void keyboard(unsigned char tecla, int x, int y){
 		case 'D':
 		case 'd':
 			if (!pausa && !fimJogo)
-				if(lekinho->getX() < PISTA3)
+				if(lekinho->getX() < PISTA3){
+					alSourcePlay(Sources[ARROW]);
 					lekinho->setX(lekinho->getX() + TAM_PISTA);
+				}
 			break;
 		case 'A':
 		case 'a':
 			if (!pausa && !fimJogo)
-				if(lekinho->getX() > PISTA1)
+				if(lekinho->getX() > PISTA1){
+					alSourcePlay(Sources[ARROW]);
 					lekinho->setX(lekinho->getX() - TAM_PISTA);
+				}
 			break;
 		case 's':
 		case 'S':
@@ -184,13 +201,18 @@ void setas (int tecla, int x, int y) {
 	switch(tecla){
 		case GLUT_KEY_RIGHT:
 			if (!pausa && !fimJogo)
-				if(lekinho->getX() < PISTA3)
+				if(lekinho->getX() < PISTA3){
+					alSourcePlay(Sources[ARROW]);
 					lekinho->setX(lekinho->getX() + TAM_PISTA);
+				}
 			break;
 		case GLUT_KEY_LEFT:
 			if (!pausa && !fimJogo)
-				if(lekinho->getX() > PISTA1)
+				if(lekinho->getX() > PISTA1){
+					alSourcePlay(Sources[ARROW]);
+
 					lekinho->setX(lekinho->getX() - TAM_PISTA);
+				}
 			break;
 		case GLUT_KEY_DOWN:
 			if (pausa)
@@ -335,8 +357,9 @@ void display(){
 	atualizarTela (TERRESTRE);
 	atualizarTela (AEREO);
 
-	if (fimJogo)
+	if (fimJogo){
 		geraViewportFimJogo();
+	}
 	
 	if (pausa)
 		geraViewportPausa();
@@ -351,6 +374,14 @@ void display(){
 }
 
 int main(int argc,char** argv){
+	alutInit(NULL, 0);
+	alGetError();
+
+	// Load the wav data.
+	if(LoadALData() == AL_FALSE) return 0;
+
+	SetListenerValues();
+
 	glutInit(&argc,argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(250,200);

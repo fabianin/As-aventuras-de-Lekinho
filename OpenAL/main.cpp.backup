@@ -1,0 +1,35 @@
+#include "OpenAL.h"
+
+int main(int argc, char *argv[]){
+	// Initialize OpenAL and clear the error bit.
+	alutInit(NULL, 0);
+	alGetError();
+
+	// Load the wav data.
+	if(LoadALData() == AL_FALSE) return 0;
+
+	SetListenerValues();
+
+	//Setup an exit procedure.
+	//atexit(KillALData);
+	//Begin the battle sample to play.
+	//alSourcePlay(Sources[BATTLE]);
+    char c = ' ';
+    while(c != 'q'){
+		c = getchar();
+        switch(c){
+			// Pressing 'p' will begin playing the sample. 
+			case 'p': alSourcePlay(Sources[BATTLE]); break;
+ 
+            // Pressing 's' will stop the sample from playing. 
+            case 's': alSourceStop(Sources[BATTLE]); break;
+ 
+            // Pressing 'h' will pause the sample. 
+            case 'h': alSourcePause(Sources[BATTLE]); break;
+            
+			case 'a': alSourcePlay(Sources[GUN1]); break;
+			case 'b': alSourcePlay(Sources[GUN2]); break;
+        }
+	}
+	return 0;
+}

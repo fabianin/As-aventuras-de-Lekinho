@@ -24,7 +24,6 @@ Fase::Fase () {
 			this->obstaculos.push_back(new Obstaculo (PLANTA_CARNIVORA, TERRESTRE, 		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.14*WIDTH, 	true, false));
 			this->obstaculos.push_back(new Obstaculo (SAPO, 			TERRESTRE, 		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.30*HEIGHT,	true, true));
 			this->obstaculos.push_back(new Obstaculo (TOCO, 			TERRESTRE, 		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.16*WIDTH, 	true, false));
-			
 			break;
 		case GELO:
 			imagem = "gelo.bmp";
