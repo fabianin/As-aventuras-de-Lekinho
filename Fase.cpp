@@ -1,6 +1,7 @@
 #include "Fase.h"
 
 Fase::Fase () {
+	
 	this->chefe = NULL;
 	
 	switch (SELECAO_CENARIO) {
@@ -17,7 +18,7 @@ Fase::Fase () {
 	
 	switch (cenario) {
 		case FLORESTA:
-			glClearColor(0, 0.5, 0, 0);
+			imagem = "grama.bmp";
 			
 			this->obstaculos.push_back(new Obstaculo (MINHOCA, 			SUBTERRANEO,	TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.08*WIDTH, 	false, true));
 			this->obstaculos.push_back(new Obstaculo (PLANTA_CARNIVORA, TERRESTRE, 		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.14*WIDTH, 	true, false));
@@ -26,7 +27,8 @@ Fase::Fase () {
 			
 			break;
 		case GELO:
-			glClearColor(0.8, 0.8, 1, 0);
+			imagem = "gelo.bmp";
+			
 			this->obstaculos.push_back(new Obstaculo (GELO_QUEBRADO,	SUBTERRANEO,	TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.30*HEIGHT, 	false, true));
 			this->obstaculos.push_back(new Obstaculo (ICEBERGS, 		TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.30*HEIGHT,	true, false));
 			this->obstaculos.push_back(new Obstaculo (URSO, 			TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.30*WIDTH, 	true, false));
@@ -34,7 +36,7 @@ Fase::Fase () {
 			
 			break;
 		case DESERTO:
-			glClearColor(0.6, 0.5, 0, 0);
+			imagem = "deserto.bmp";
 			
 			this->obstaculos.push_back(new Obstaculo (CACTO, 			TERRESTRE,		TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.10*WIDTH, 	true, false));
 			this->obstaculos.push_back(new Obstaculo (AREIA_MOVEDICA, 	SUBTERRANEO,	TRANSLADANDO, PISTA_ALEATORIA, Y_INICIAL, 0.20*WIDTH, 	true, false));
@@ -43,6 +45,10 @@ Fase::Fase () {
 			
 			break;
 	}
+	
+	textura = fopen(imagem.c_str(), "rb");
+	Texture tex(textura);
+    texID = tex.getTexID();
 	
 	renovarObstaculos();
 	renovarBonus();

@@ -1,7 +1,8 @@
-#include "SOIL.h"
 #include "Fase.h"
 
 fstream arquivoPontuacao;
+
+float contadorImagem = HEIGHT;
 
 float fatorVelocidade;	
 float tempoPontuacao;
@@ -11,12 +12,17 @@ long long int pontuacao;
 long long int pontuacaoMaisAlta = 0;
 bool fimJogo;
 bool sim;
+bool moverCenario;
 MenuPausa menuPausa;
+string imagem;
 
 Personagem *lekinho;
 Fase *fase;
 
-void iniciarJogo () {
+GLuint texID;
+FILE *textura;
+
+void iniciarJogo () {	
 	fatorVelocidade = 0.5;	
 	tempoPontuacao = 0;
 	tempoFase = 0;
@@ -24,6 +30,7 @@ void iniciarJogo () {
 	pontuacao = 0;
 	fimJogo = false;
 	sim = true;
+	moverCenario = true;
 	menuPausa = CONTINUAR;
 	lekinho = new Personagem (LEKINHO, TERRESTRE, TRANSLADANDO, PISTA2, Y_LEKINHO, 0.06*HEIGHT, true, 1);
 	fase = new Fase ();
@@ -32,7 +39,7 @@ void iniciarJogo () {
 
 void init() {
 	if (ifstream ("Pontuacao.bin")) {
-		arquivoPontuacao.open ("Pontuacao.bin", ios::in);
+		arquivoPontuacao.open ("Pontuacao.bin", ios::in | ios::binary);
 		arquivoPontuacao >> pontuacaoMaisAlta;
 		arquivoPontuacao.close();
 	}
@@ -55,7 +62,7 @@ void atualizarPontuacao () {
 void salvarRecord () {
 	if (pontuacao > pontuacaoMaisAlta)
 		pontuacaoMaisAlta = pontuacao;
-	arquivoPontuacao.open ("Pontuacao.bin", ios::out);
+	arquivoPontuacao.open ("Pontuacao.bin", ios::out | ios::binary);
 	arquivoPontuacao << pontuacaoMaisAlta;
 	arquivoPontuacao.close();
 }
@@ -84,12 +91,14 @@ void idle(){
 						tempoFase = 0;
 						fase->iniciarChefe();
 					}
-				if (fase->getChefe() && !fase->getChefe()->getVida()) {
+				if (fase->getChefe() && !fase->getChefe()->getVida() && fase->getChefe()->getY() < Y_FINAL) {
+					moverCenario = false;
 					lekinho->setY(lekinho->getY() + 8*fatorVelocidade);
 					if (lekinho->getY() > Y_INICIAL) {
 						fase->terminarChefe();
 						fase = new Fase ();
 						lekinho->setY(Y_LEKINHO);
+						moverCenario = true;
 					}
 				}
 				else
@@ -101,6 +110,10 @@ void idle(){
 			if (!fase->getChefe())
 				tempoFase++;
 		}
+		if (moverCenario)
+			contadorImagem -= 8*fatorVelocidade;
+		if (contadorImagem < 0)
+			contadorImagem = HEIGHT;
 	}
 	glutPostRedisplay();
 }
@@ -295,6 +308,28 @@ void display(){
 	glClear(GL_COLOR_BUFFER_BIT);
 	
 	glViewport(0, 0, WIDTH, HEIGHT);
+	
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture (GL_TEXTURE_2D, texID);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glBegin(GL_POLYGON);
+		glTexCoord2i(0,0); glVertex3f(0, 		contadorImagem - HEIGHT, 		0);
+		glTexCoord2i(1,0); glVertex3f(WIDTH, 	contadorImagem - HEIGHT,		0);
+		glTexCoord2i(1,1); glVertex3f(WIDTH, 	contadorImagem, 0);
+		glTexCoord2i(0,1); glVertex3f(0, 		contadorImagem, 0);
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+	
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture (GL_TEXTURE_2D, texID);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glBegin(GL_POLYGON);
+		glTexCoord2i(0,0); glVertex3f(0, 		contadorImagem, 		0);
+		glTexCoord2i(1,0); glVertex3f(WIDTH, 	contadorImagem, 		0);
+		glTexCoord2i(1,1); glVertex3f(WIDTH, 	contadorImagem + HEIGHT, 0);
+		glTexCoord2i(0,1); glVertex3f(0, 		contadorImagem + HEIGHT, 0);
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
 	
 	atualizarTela (SUBTERRANEO);
 	atualizarTela (TERRESTRE);

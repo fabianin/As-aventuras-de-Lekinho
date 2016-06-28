@@ -71,20 +71,20 @@ void desenhaQuadrilatero (float x1, float y1, float x2, float y2, float x3, floa
 
 void desenhaGeloTrincado () {
 	glColor3f(0, 0, 1);
-	desenhaLinha(0.00,  0.00, 0.05, -0.05, 1);
-	desenhaLinha(0.05, -0.05, 0.05, -0.10, 1);
+	desenhaLinha(0.00,  0.00, 0.05, -0.05, 3);
+	desenhaLinha(0.05, -0.05, 0.05, -0.10, 3);
 	
-	desenhaLinha(0.00,   0.00, -0.03, -0.05, 1);
-	desenhaLinha(-0.03, -0.05, -0.07, -0.06, 1);
+	desenhaLinha(0.00,   0.00, -0.03, -0.05, 3);
+	desenhaLinha(-0.03, -0.05, -0.07, -0.06, 3);
 	
-	desenhaLinha(0.00,  0.00, -0.05, 0.00, 1);
-	desenhaLinha(-0.05, 0.00, -0.10, 0.05, 1);
+	desenhaLinha(0.00,  0.00, -0.05, 0.00, 3);
+	desenhaLinha(-0.05, 0.00, -0.10, 0.05, 3);
 	
-	desenhaLinha(0.00, 0.00,  0.00, 0.05, 1);
-	desenhaLinha(0.00, 0.05, -0.03, 0.10, 1);
+	desenhaLinha(0.00, 0.00,  0.00, 0.05, 3);
+	desenhaLinha(0.00, 0.05, -0.03, 0.10, 3);
 	
-	desenhaLinha(0.00, 0.00, 0.05, 0.03, 1);
-	desenhaLinha(0.05, 0.03, 0.09, 0.03, 1);
+	desenhaLinha(0.00, 0.00, 0.05, 0.03, 3);
+	desenhaLinha(0.05, 0.03, 0.09, 0.03, 3);
 }
 
 void desenhaUrso () {
@@ -141,14 +141,14 @@ void desenhaGeloQuebrado (Estado estado) {
 }
 
 void desenhaIceberg (float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
-	glColor3f(0.94, 0.94, 1);
-	desenhaTriangulo(0.5*(x1+x3), 0.5*(y2+y4), x1, y1, x4, y4);
-	glColor3f(0.86, 0.86, 1);
-	desenhaTriangulo(0.5*(x1+x3), 0.5*(y2+y4), x3, y3, x4, y4);
-	glColor3f(0.78, 0.78, 1);
-	desenhaTriangulo(0.5*(x1+x3), 0.5*(y2+y4), x1, y1, x2, y2);
-	glColor3f(0.7, 0.7, 1);
+	glColor3f(1, 1, 1);
 	desenhaTriangulo(0.5*(x1+x3), 0.5*(y2+y4), x2, y2, x3, y3);
+	glColor3f(0.9, 0.9, 1);
+	desenhaTriangulo(0.5*(x1+x3), 0.5*(y2+y4), x1, y1, x4, y4);
+	glColor3f(0.6, 0.6, 1);
+	desenhaTriangulo(0.5*(x1+x3), 0.5*(y2+y4), x3, y3, x4, y4);
+	glColor3f(0.5, 0.5, 1);
+	desenhaTriangulo(0.5*(x1+x3), 0.5*(y2+y4), x1, y1, x2, y2);
 }
 
 void desenhaIcebergs () {
@@ -305,7 +305,7 @@ void desenhaMinhoca (Estado estado, int tempoEstado) {
 }
 
 void desenhaAreiaMovedica (int tempoEstado) {
-	glColor3f(0.7, 0.6, 0);
+	glColor3f(0.95, 0.7, 0.4);
 	desenhaCirculo(0, 0, 0.1);
 	
 	float aux = 0.09;
@@ -314,7 +314,7 @@ void desenhaAreiaMovedica (int tempoEstado) {
 		aux = 0.08;
 	
 	glColor3f(0.5, 0.2, 0);
-	for (float i = aux; i > 0; i -= 0.02) 
+	for (float i = aux; i >= 0; i -= 0.02) 
 		desenhaCircunferencia(0, 0, i);
 }
 
@@ -505,12 +505,13 @@ void desenhaBonecoDeNeve (int tempoEstado, Estado estado) {
 }
 
 void desenhaVerme (int tempoEstado, Estado estado) {
-	glColor3f(0.7, 0.6, 0); //areia
+	glColor3f(0.9, 0.65, 0.35); //areia
 	desenhaCirculo(0, 0, 0.08);
 	desenhaQuadrilatero(-0.08, 0, 0.08, 0, 0.08, -50/HEIGHT, -0.08, -50/HEIGHT);
-	glColor3f(1, 1, 0);
+	glColor3f(0.5, 0.2, 0);
 	for (int i = 0; i >= -50; i -= 15)
 		desenhaLinha(-0.08, (i - 2*fatorVelocidade*(tempoEstado%10))/HEIGHT, 0.08, (i - 2*fatorVelocidade*(tempoEstado%10))/HEIGHT, 1);
+	glColor3f(1, 0.9, 0.8);
 	if (estado == INICIANDO_ATAQUE) {
 		desenhaCirculo(0, 0, 0.01*((tempoEstado/2)%8));
 		desenhaCirculo(0, 0, 0.01*((tempoEstado/2)%4));
@@ -639,5 +640,4 @@ void desenhaQuadro () {
 	glColor4f(0, 0, 0, 0.4);
 	desenhaQuadrilatero(1/12.0, 1/8.0, 11/12.0, 1/8.0, 11/12.0, 7/8.0, 1/12.0, 7/8.0);
 	glDisable(GL_BLEND);
-	glColor3f(1, 1, 1);
 }
